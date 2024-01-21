@@ -3,9 +3,11 @@
 #include "Input.h"
 #include "PathHelpers.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_dx11.h"
-#include "imgui/imgui_impl_win32.h"
+// This code assumes files are in "ImGui" subfolder!
+// Adjust as necessary for your own folder structure and project setup
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_dx11.h"
+#include "ImGui/imgui_impl_win32.h"
 
 
 // Needed for a helper function to load pre-compiled shader files
@@ -37,6 +39,9 @@ Game::Game(HINSTANCE hInstance)
 	CreateConsoleWindow(500, 120, 32, 120);
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
+
+	float color[4] = {0,0,0,1};
+	int number = 0;
 }
 
 // --------------------------------------------------------
@@ -103,6 +108,8 @@ void Game::Init()
 		context->VSSetShader(vertexShader.Get(), 0, 0);
 		context->PSSetShader(pixelShader.Get(), 0, 0);
 	}
+
+	
 }
 
 void Game::Helper(float deltaTime) {
@@ -121,7 +128,36 @@ void Game::Helper(float deltaTime) {
 	input.SetKeyboardCapture(io.WantCaptureKeyboard);
 	input.SetMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
+	
+}
+
+void Game::BuildUI() 
+{
+	ImGui::Begin("Some Stats");
+
+
+	// Framerate
+	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
+
+	// Dimensions
+	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
+
+	XMFLOAT4 bColor(color[0], color[1], color[2], color[3]);
+	// Color Picker
+	ImGui::ColorEdit4("RGBA color editor", color);
+	if (ImGui::Button("Show ImGui Demo Window")) 
+	{
+		ImGui::ShowDemoWindow();
+	}
+	ImGui::SliderInt("Choose a number", &number, 0, 100);
+
+	if (ImGui::Button("Press to increment")) 
+	{
+		number++;
+	}
+
+	ImGui::End();
 }
 
 // --------------------------------------------------------
@@ -306,6 +342,7 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	Helper(deltaTime);
+	BuildUI();
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
@@ -322,8 +359,10 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - At the beginning of Game::Draw() before drawing *anything*
 	{
 		// Clear the back buffer (erases what's on the screen)
-		const float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f }; // Cornflower Blue
+		float bgColor[4] = { color[0], color[1], color[2], color[3] }; // Cornflower Blue
+
 		context->ClearRenderTargetView(backBufferRTV.Get(), bgColor);
+
 
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -359,13 +398,16 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - These should happen exactly ONCE PER FRAME
 	// - At the very end of the frame (after drawing *everything*)
 	{
+
+		ImGui::Render(); // Turns this frame’s UI into renderable triangles
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
+
 		// Present the back buffer to the user
 		//  - Puts the results of what we've drawn onto the window
 		//  - Without this, the user never sees anything
 		bool vsyncNecessary = vsync || !deviceSupportsTearing || isFullscreen;
 		
-		ImGui::Render(); // Turns this frame’s UI into renderable triangles
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
+		
 
 		swapChain->Present(
 			vsyncNecessary ? 1 : 0,
