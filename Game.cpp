@@ -53,6 +53,7 @@ Game::Game(HINSTANCE hInstance)
 	std::shared_ptr<Mesh> triangle;
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> polygon;
+	std::shared_ptr<Mesh> house;
 }
 
 // --------------------------------------------------------
@@ -418,15 +419,29 @@ void Game::CreateGeometry()
 	};
 
 	unsigned int indices3[] = { 0, 1, 2, 2, 3, 4, 0 , 4, 5 };
+
+	Vertex vert4[] = {
+		{XMFLOAT3(+0.65f, -0.65f, +0.0f), blue}, //0
+		{XMFLOAT3(+0.7f, -0.6f, +0.0f), green}, //1
+		{XMFLOAT3(+0.75f, -0.65f, +0.0f), blue}, //2
+		{XMFLOAT3(+0.675f, -0.65f, +0.0f), red}, //3
+		{XMFLOAT3(+0.725f, -0.65f, +0.0f), red}, //4
+		{XMFLOAT3(+0.675f, -0.75f, +0.0f), green}, //5
+		{XMFLOAT3(+0.725f, -0.75f, +0.0f), green}, //6
+	};
+
+	unsigned int indices4[] = { 0, 1, 2, 3, 4, 5, 4 , 6, 5 };
 	
 
 	triangle = std::make_shared<Mesh>(vert1, indices1, 3, 3, device);
 	square = std::make_shared<Mesh>(vert2, indices2, 6, 4, device);
 	polygon = std::make_shared<Mesh>(vert3, indices3, 9, 6, device);
+	house = std::make_shared<Mesh>(vert4, indices4, 9, 7, device);
 
 	meshes.push_back(triangle);
 	meshes.push_back(square);
 	meshes.push_back(polygon);
+	meshes.push_back(house);
 	
 }
 
