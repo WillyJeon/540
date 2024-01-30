@@ -2,7 +2,10 @@
 #include "Vertex.h"
 #include "Input.h"
 #include "PathHelpers.h"
-
+#include <random>
+#include <stdio.h>      
+#include <stdlib.h>    
+#include "Mesh.h"
 // This code assumes files are in "ImGui" subfolder!
 // Adjust as necessary for your own folder structure and project setup
 #include "ImGui/imgui.h"
@@ -32,7 +35,10 @@ Game::Game(HINSTANCE hInstance)
 		1280,				// Width of the window's client area
 		720,				// Height of the window's client area
 		false,				// Sync the framerate to the monitor refresh? (lock framerate)
-		true)				// Show extra stats (fps) in title bar?
+		true),				// Show extra stats (fps) in title bar?
+	color{ 0, 0, 0, 1 },
+	hand(0),
+	cpHand(0)
 {
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -40,8 +46,13 @@ Game::Game(HINSTANCE hInstance)
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
 
-	float color[4] = {0,0,0,1};
+	//color[4] = {};
 	int number = 0;
+	bool show = false;
+
+	std::shared_ptr<Mesh> triangle;
+	std::shared_ptr<Mesh> square;
+	std::shared_ptr<Mesh> polygon;
 }
 
 // --------------------------------------------------------
@@ -109,6 +120,12 @@ void Game::Init()
 		context->PSSetShader(pixelShader.Get(), 0, 0);
 	}
 
+	srand(1);
+	hand = rand() % 11;
+	hand += rand() % 11;
+
+	cpHand = rand() % 11;
+	cpHand += rand() % 11;
 	
 }
 
@@ -136,7 +153,11 @@ void Game::BuildUI()
 {
 	ImGui::Begin("Some Stats");
 
+	if (show) {
+		ImGui::ShowDemoWindow();
+	}
 
+	
 	// Framerate
 	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
 
@@ -148,7 +169,7 @@ void Game::BuildUI()
 	ImGui::ColorEdit4("RGBA color editor", color);
 	if (ImGui::Button("Show ImGui Demo Window")) 
 	{
-		ImGui::ShowDemoWindow();
+		show = !show;
 	}
 	ImGui::SliderInt("Choose a number", &number, 0, 100);
 
@@ -157,7 +178,45 @@ void Game::BuildUI()
 		number++;
 	}
 
+
+	//ImGui::Text("Your hand is %i", hand);
+	////ImGui::Text("Computer hand is %i", cpHand);
+	//ImGui::Text("Do you hit or stay");
+
+	//if (ImGui::Button("Hit"))
+	//{
+	//	hand += rand() % 11;
+	//}
+	//if (ImGui::Button("Stay"))
+	//{
+	//	ImGui::Text("Computer hand is %i", cpHand);
+	//}
+	//
+	//if (cpHand < 17) {
+	//	cpHand += rand() % 11;
+	//	if (cpHand > 21) {
+	//		ImGui::Text("Player Wins!!!");
+	//	}
+	//	else {
+	//		if (hand > cpHand && cpHand < 17) {
+	//			ImGui::Text("Player Wins!!!");
+	//		}
+	//	}
+	//}
+
+	//if (hand > 21) {
+	//	ImGui::Text("BUST!!!!");
+	//}
+
 	ImGui::End();
+	ImGui::Begin("Meshes");
+	ImGui::Text("Meshes");
+	ImGui::Text("Mesh 0: %i triangle(s)", triangle->GetIndexCount()/3);
+	ImGui::Text("Mesh 1: %i triangle(s)", square->GetIndexCount()/3);
+	ImGui::Text("Mesh 2: %i triangle(s)", polygon->GetIndexCount() / 3);
+
+	ImGui::End();
+
 }
 
 // --------------------------------------------------------
@@ -228,6 +287,8 @@ void Game::LoadShaders()
 			vertexShaderBlob->GetBufferSize(),		// Size of the shader code that uses this layout
 			inputLayout.GetAddressOf());			// Address of the resulting ID3D11InputLayout pointer
 	}
+
+
 }
 
 
@@ -257,6 +318,7 @@ void Game::CreateGeometry()
 	//    since we're describing the triangle in terms of the window itself
 	Vertex vertices[] =
 	{
+		
 		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
 		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
 		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
@@ -274,54 +336,98 @@ void Game::CreateGeometry()
 	// - This holds the vertex data of triangles for a single object
 	// - This buffer is created on the GPU, which is where the data needs to
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
-	{
-		// First, we need to describe the buffer we want Direct3D to make on the GPU
-		//  - Note that this variable is created on the stack since we only need it once
-		//  - After the buffer is created, this description variable is unnecessary
-		D3D11_BUFFER_DESC vbd	= {};
-		vbd.Usage				= D3D11_USAGE_IMMUTABLE;	// Will NEVER change
-		vbd.ByteWidth			= sizeof(Vertex) * 3;       // 3 = number of vertices in the buffer
-		vbd.BindFlags			= D3D11_BIND_VERTEX_BUFFER; // Tells Direct3D this is a vertex buffer
-		vbd.CPUAccessFlags		= 0;	// Note: We cannot access the data from C++ (this is good)
-		vbd.MiscFlags			= 0;
-		vbd.StructureByteStride = 0;
+	//{
+	//	// First, we need to describe the buffer we want Direct3D to make on the GPU
+	//	//  - Note that this variable is created on the stack since we only need it once
+	//	//  - After the buffer is created, this description variable is unnecessary
+	//	D3D11_BUFFER_DESC vbd	= {};
+	//	vbd.Usage				= D3D11_USAGE_IMMUTABLE;	// Will NEVER change
+	//	vbd.ByteWidth			= sizeof(Vertex) * 3;       // 3 = number of vertices in the buffer
+	//	vbd.BindFlags			= D3D11_BIND_VERTEX_BUFFER; // Tells Direct3D this is a vertex buffer
+	//	vbd.CPUAccessFlags		= 0;	// Note: We cannot access the data from C++ (this is good)
+	//	vbd.MiscFlags			= 0;
+	//	vbd.StructureByteStride = 0;
 
-		// Create the proper struct to hold the initial vertex data
-		// - This is how we initially fill the buffer with data
-		// - Essentially, we're specifying a pointer to the data to copy
-		D3D11_SUBRESOURCE_DATA initialVertexData = {};
-		initialVertexData.pSysMem = vertices; // pSysMem = Pointer to System Memory
+	//	// Create the proper struct to hold the initial vertex data
+	//	// - This is how we initially fill the buffer with data
+	//	// - Essentially, we're specifying a pointer to the data to copy
+	//	D3D11_SUBRESOURCE_DATA initialVertexData = {};
+	//	initialVertexData.pSysMem = vertices; // pSysMem = Pointer to System Memory
 
-		// Actually create the buffer on the GPU with the initial data
-		// - Once we do this, we'll NEVER CHANGE DATA IN THE BUFFER AGAIN
-		device->CreateBuffer(&vbd, &initialVertexData, vertexBuffer.GetAddressOf());
-	}
+	//	// Actually create the buffer on the GPU with the initial data
+	//	// - Once we do this, we'll NEVER CHANGE DATA IN THE BUFFER AGAIN
+	//	device->CreateBuffer(&vbd, &initialVertexData, vertexBuffer.GetAddressOf());
+	//}
 
 	// Create an INDEX BUFFER
 	// - This holds indices to elements in the vertex buffer
 	// - This is most useful when vertices are shared among neighboring triangles
 	// - This buffer is created on the GPU, which is where the data needs to
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
+	//{
+	//	// Describe the buffer, as we did above, with two major differences
+	//	//  - Byte Width (3 unsigned integers vs. 3 whole vertices)
+	//	//  - Bind Flag (used as an index buffer instead of a vertex buffer) 
+	//	D3D11_BUFFER_DESC ibd	= {};
+	//	ibd.Usage				= D3D11_USAGE_IMMUTABLE;	// Will NEVER change
+	//	ibd.ByteWidth			= sizeof(unsigned int) * 3;	// 3 = number of indices in the buffer
+	//	ibd.BindFlags			= D3D11_BIND_INDEX_BUFFER;	// Tells Direct3D this is an index buffer
+	//	ibd.CPUAccessFlags		= 0;	// Note: We cannot access the data from C++ (this is good)
+	//	ibd.MiscFlags			= 0;
+	//	ibd.StructureByteStride = 0;
+
+	//	// Specify the initial data for this buffer, similar to above
+	//	D3D11_SUBRESOURCE_DATA initialIndexData = {};
+	//	initialIndexData.pSysMem = indices; // pSysMem = Pointer to System Memory
+
+	//	// Actually create the buffer with the initial data
+	//	// - Once we do this, we'll NEVER CHANGE THE BUFFER AGAIN
+	//	device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
+	//}
+
+	// Shape #1
+	Vertex vert1[] =
 	{
-		// Describe the buffer, as we did above, with two major differences
-		//  - Byte Width (3 unsigned integers vs. 3 whole vertices)
-		//  - Bind Flag (used as an index buffer instead of a vertex buffer) 
-		D3D11_BUFFER_DESC ibd	= {};
-		ibd.Usage				= D3D11_USAGE_IMMUTABLE;	// Will NEVER change
-		ibd.ByteWidth			= sizeof(unsigned int) * 3;	// 3 = number of indices in the buffer
-		ibd.BindFlags			= D3D11_BIND_INDEX_BUFFER;	// Tells Direct3D this is an index buffer
-		ibd.CPUAccessFlags		= 0;	// Note: We cannot access the data from C++ (this is good)
-		ibd.MiscFlags			= 0;
-		ibd.StructureByteStride = 0;
+		//					Position || Color
+		{ XMFLOAT3(+0.4f, +0.3f, +0.0f), green },
+		{ XMFLOAT3(+0.6f, +0.0f, +0.0f), blue },
+		{ XMFLOAT3(+0.3f, +0.0f, +0.0f), red },
+	};
 
-		// Specify the initial data for this buffer, similar to above
-		D3D11_SUBRESOURCE_DATA initialIndexData = {};
-		initialIndexData.pSysMem = indices; // pSysMem = Pointer to System Memory
+	unsigned int indices1[] = { 0, 1, 2 };
+	
+	// Shape #2
+	Vertex vert2[] = {
+		{XMFLOAT3(-0.3f, -0.3f, +0.0f), red}, //Bottom Left
+		{XMFLOAT3(-0.3f, +0.0f, +0.0f), blue}, //Top Left
+		{XMFLOAT3(+0.0f, +0.0f, +0.0f), green}, // Top RIght
+		{XMFLOAT3(+0.0f, -0.3f, +0.0f), blue} //Bottom Right
+	};
 
-		// Actually create the buffer with the initial data
-		// - Once we do this, we'll NEVER CHANGE THE BUFFER AGAIN
-		device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
-	}
+	unsigned int indices2[] = { 0, 1, 2, 0, 2, 3 };
+
+
+	// Shape #3
+	Vertex vert3[] = {
+		{XMFLOAT3(+0.65f, +0.65f, +0.0f), blue}, //0
+		{XMFLOAT3(+0.7f, +0.7f, +0.0f), green}, //1
+		{XMFLOAT3(+0.75f, +0.65f, +0.0f), blue}, //2
+		{XMFLOAT3(+0.8f, +0.7f, +0.0f), red}, //3
+		{XMFLOAT3(+0.85f, +0.65f, +0.0f), green}, //4
+		{XMFLOAT3(+0.75f, +0.55f, +0.0f), red}, //5
+	};
+
+	unsigned int indices3[] = { 0, 1, 2, 2, 3, 4, 0 , 4, 5 };
+	
+
+	triangle = std::make_shared<Mesh>(vert1, indices1, 3, 3, device);
+	square = std::make_shared<Mesh>(vert2, indices2, 6, 4, device);
+	polygon = std::make_shared<Mesh>(vert3, indices3, 9, 6, device);
+
+	meshes.push_back(triangle);
+	meshes.push_back(square);
+	meshes.push_back(polygon);
+	
 }
 
 
@@ -392,6 +498,9 @@ void Game::Draw(float deltaTime, float totalTime)
 			3,     // The number of indices to use (we could draw a subset if we wanted)
 			0,     // Offset to the first index we want to use
 			0);    // Offset to add to each index when looking up vertices
+	}
+	for (int i = 0; i < meshes.size(); i++) {
+		meshes[i]->Draw(context);
 	}
 
 	// Frame END
