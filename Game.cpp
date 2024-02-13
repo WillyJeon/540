@@ -6,6 +6,7 @@
 #include <stdio.h>      
 #include <stdlib.h>    
 #include "Mesh.h"
+#include "Transform.h"
 // This code assumes files are in "ImGui" subfolder!
 // Adjust as necessary for your own folder structure and project setup
 #include "ImGui/imgui.h"
@@ -121,12 +122,19 @@ void Game::Init()
 		context->PSSetShader(pixelShader.Get(), 0, 0);
 	}
 
-	srand(1);
-	hand = rand() % 11;
-	hand += rand() % 11;
+	unsigned int size = sizeof(BufferStruct);
+	size = (size + 15) / 16 * 16;
 
-	cpHand = rand() % 11;
-	cpHand += rand() % 11;
+	D3D11_BUFFER_DESC cbDesc = {};
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.ByteWidth = 32;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
+	context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
 	
 }
 
