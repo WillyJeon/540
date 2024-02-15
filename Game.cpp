@@ -180,9 +180,26 @@ void Game::BuildUI()
 		show = !show;
 	}
 
-	if (ImGui::TreeNode("Entities")) {
-		if (ImGui::TreeNode("Entity 0: ")) {
-			Transforms* transform = entities[0]->GetTransform();
+
+	ImGui::Text("Meshes");
+
+	ImGui::Text("Mesh 1: %i triangle(s)", square->GetIndexCount() / 3);
+	ImGui::Text("Mesh 2: %i triangle(s)", polygon->GetIndexCount() / 3);
+	ImGui::Text("Mesh 3: %i triangle(s)", house->GetIndexCount() / 3);
+
+	ImGui::SliderFloat3("Offset", &offset[0], 0, 1, 0);
+	ImGui::ColorEdit4("Tint", tint);
+	
+
+	ImGui::End();
+}
+
+void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities) 
+{
+	ImGui::Begin("Entities");
+	for (int i = 0; i < entities.size(); i++) {
+		if (ImGui::TreeNode("Entity %i:" + i)) {
+			Transforms* transform = entities[i]->GetTransform();
 			XMFLOAT3 pos = transform->GetPosition();
 			XMFLOAT3 rot = transform->GetPitchYawRoll();
 			XMFLOAT3 scale = transform->GetScale();
@@ -197,49 +214,10 @@ void Game::BuildUI()
 			}
 			ImGui::TreePop();
 		}
-
-
-
-		if (ImGui::TreeNode("Entity 1: ")) {
-			Transforms* transformOne = entities[1]->GetTransform();
-			XMFLOAT3 posOne = transformOne->GetPosition();
-			XMFLOAT3 rotOne = transformOne->GetPitchYawRoll();
-			XMFLOAT3 scaleOne = transformOne->GetScale();
-			if (ImGui::DragFloat3("Position", &posOne.x, 0.1f)) {
-				transformOne->SetPosition(posOne.x, posOne.y, posOne.z);
-			}
-			if (ImGui::DragFloat3("Rotation", &rotOne.x, 0.1f)) {
-				transformOne->SetRotation(rotOne.x, rotOne.y, rotOne.z);
-			}
-			if (ImGui::DragFloat3("Scale", &scaleOne.x, 0.1f)) {
-				transformOne->SetScale(scaleOne.x, scaleOne.y, scaleOne.z);
-			}
-			ImGui::TreePop();
-		}
-		ImGui::TreePop();
 	}
-	
-
-	
 
 	ImGui::End();
 
-	ImGui::Begin("Meshes");
-
-	ImGui::Text("Meshes");
-	
-	ImGui::Text("Mesh 1: %i triangle(s)", square->GetIndexCount()/3);
-	ImGui::Text("Mesh 2: %i triangle(s)", polygon->GetIndexCount() / 3);
-	ImGui::Text("Mesh 3: %i triangle(s)", house->GetIndexCount() / 3);
-
-	ImGui::SliderFloat3("Offset", &offset[0], 0, 1, 0);
-	ImGui::ColorEdit4("Tint", tint);
-
-	
-
-
-
-	ImGui::End();
 
 }
 
@@ -506,6 +484,8 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	Helper(deltaTime);
 	BuildUI();
+	EntitiesUI(entities);
+	
 
 	entities[0]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
 	// Example input checking: Quit if the escape key is pressed

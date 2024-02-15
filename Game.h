@@ -38,6 +38,7 @@ private:
 	void CreateGeometry();
 	void Helper(float deltaTime);
 	void BuildUI();
+	void EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities);
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
