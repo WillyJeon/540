@@ -50,6 +50,7 @@ Mesh::Mesh(Vertex vertices[], unsigned int indices[], int numberIndices, int num
 	// Actually create the buffer with the initial data
 	// - Once we do this, we'll NEVER CHANGE THE BUFFER AGAIN
 	device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
+	
 
 	this->numberIndices = numberIndices;
 }
@@ -60,13 +61,14 @@ Mesh::~Mesh()
 
 Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetVertexBuffer()
 {
-	return Microsoft::WRL::ComPtr<ID3D11Buffer>();
+	return Microsoft::WRL::ComPtr<ID3D11Buffer>(vertexBuffer);
 }
 
 Microsoft::WRL::ComPtr<ID3D11Buffer> Mesh::GetIndexBuffer()
 {
-	return Microsoft::WRL::ComPtr<ID3D11Buffer>();
+	return Microsoft::WRL::ComPtr<ID3D11Buffer>(indexBuffer);
 }
+
 
 int Mesh::GetIndexCount()
 {
@@ -77,8 +79,11 @@ void Mesh::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context)
 {
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
+	
 	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	
 
 	context->DrawIndexed(
 		numberIndices,     // The number of indices to use (we could draw a subset if we wanted)

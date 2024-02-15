@@ -38,7 +38,9 @@ Game::Game(HINSTANCE hInstance)
 		true),				// Show extra stats (fps) in title bar?
 	color{ 0, 0, 0, 1 },
 	hand(0),
-	cpHand(0)
+	cpHand(0),
+	tint{1.0f, 0.5f, 0.5f, 1.0f},
+	offset{0,0,0}
 {
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -54,6 +56,7 @@ Game::Game(HINSTANCE hInstance)
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> polygon;
 	std::shared_ptr<Mesh> house;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
 }
 
 // --------------------------------------------------------
@@ -120,14 +123,18 @@ void Game::Init()
 		context->VSSetShader(vertexShader.Get(), 0, 0);
 		context->PSSetShader(pixelShader.Get(), 0, 0);
 	}
-
-	srand(1);
-	hand = rand() % 11;
-	hand += rand() % 11;
-
-	cpHand = rand() % 11;
-	cpHand += rand() % 11;
 	
+	
+
+	unsigned int size = sizeof(BufferStruct);
+	size = (size + 15) / 16 * 16;
+	D3D11_BUFFER_DESC cbDesc = {};
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.ByteWidth = size;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	device->CreateBuffer(&cbDesc, 0, constBuffer.GetAddressOf());
+
 }
 
 void Game::Helper(float deltaTime) {
@@ -172,49 +179,65 @@ void Game::BuildUI()
 	{
 		show = !show;
 	}
-	ImGui::SliderInt("Choose a number", &number, 0, 100);
 
-	if (ImGui::Button("Press to increment")) 
-	{
-		number++;
+	if (ImGui::TreeNode("Entities")) {
+		if (ImGui::TreeNode("Entity 0: ")) {
+			Transforms* transform = entities[0]->GetTransform();
+			XMFLOAT3 pos = transform->GetPosition();
+			XMFLOAT3 rot = transform->GetPitchYawRoll();
+			XMFLOAT3 scale = transform->GetScale();
+			if (ImGui::DragFloat3("Position", &pos.x, 0.1f)) {
+				transform->SetPosition(pos.x, pos.y, pos.z);
+			}
+			if (ImGui::DragFloat3("Rotation", &rot.x, 0.1f)) {
+				transform->SetRotation(rot.x, rot.y, rot.z);
+			}
+			if (ImGui::DragFloat3("Scale", &scale.x, 0.1f)) {
+				transform->SetScale(scale.x, scale.y, scale.z);
+			}
+			ImGui::TreePop();
+		}
+
+
+
+		if (ImGui::TreeNode("Entity 1: ")) {
+			Transforms* transformOne = entities[1]->GetTransform();
+			XMFLOAT3 posOne = transformOne->GetPosition();
+			XMFLOAT3 rotOne = transformOne->GetPitchYawRoll();
+			XMFLOAT3 scaleOne = transformOne->GetScale();
+			if (ImGui::DragFloat3("Position", &posOne.x, 0.1f)) {
+				transformOne->SetPosition(posOne.x, posOne.y, posOne.z);
+			}
+			if (ImGui::DragFloat3("Rotation", &rotOne.x, 0.1f)) {
+				transformOne->SetRotation(rotOne.x, rotOne.y, rotOne.z);
+			}
+			if (ImGui::DragFloat3("Scale", &scaleOne.x, 0.1f)) {
+				transformOne->SetScale(scaleOne.x, scaleOne.y, scaleOne.z);
+			}
+			ImGui::TreePop();
+		}
+		ImGui::TreePop();
 	}
+	
 
-
-	//ImGui::Text("Your hand is %i", hand);
-	////ImGui::Text("Computer hand is %i", cpHand);
-	//ImGui::Text("Do you hit or stay");
-
-	//if (ImGui::Button("Hit"))
-	//{
-	//	hand += rand() % 11;
-	//}
-	//if (ImGui::Button("Stay"))
-	//{
-	//	ImGui::Text("Computer hand is %i", cpHand);
-	//}
-	//
-	//if (cpHand < 17) {
-	//	cpHand += rand() % 11;
-	//	if (cpHand > 21) {
-	//		ImGui::Text("Player Wins!!!");
-	//	}
-	//	else {
-	//		if (hand > cpHand && cpHand < 17) {
-	//			ImGui::Text("Player Wins!!!");
-	//		}
-	//	}
-	//}
-
-	//if (hand > 21) {
-	//	ImGui::Text("BUST!!!!");
-	//}
+	
 
 	ImGui::End();
+
 	ImGui::Begin("Meshes");
+
 	ImGui::Text("Meshes");
-	ImGui::Text("Mesh 0: %i triangle(s)", triangle->GetIndexCount()/3);
+	
 	ImGui::Text("Mesh 1: %i triangle(s)", square->GetIndexCount()/3);
 	ImGui::Text("Mesh 2: %i triangle(s)", polygon->GetIndexCount() / 3);
+	ImGui::Text("Mesh 3: %i triangle(s)", house->GetIndexCount() / 3);
+
+	ImGui::SliderFloat3("Offset", &offset[0], 0, 1, 0);
+	ImGui::ColorEdit4("Tint", tint);
+
+	
+
+
 
 	ImGui::End();
 
@@ -299,6 +322,8 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
+
+
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
 	XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -443,6 +468,23 @@ void Game::CreateGeometry()
 	meshes.push_back(polygon);
 	meshes.push_back(house);
 	
+
+	//Entities list
+
+	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(triangle);
+	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(square);
+	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(polygon);
+	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(triangle);
+
+	entityOne->GetTransform()->Rotate(0, 0, .3f);
+	entityTwo->GetTransform()->MoveAbsolute(0.0, 0, 0);
+	entityThree->GetTransform()->MoveAbsolute(-0.7, 0, 0);
+	//entityFour->GetTransform()->MoveAbsolute(-0.7, 0, 0);
+
+	entities.push_back(entityOne);
+	entities.push_back(entityTwo);
+	entities.push_back(entityThree);
+	entities.push_back(entityFour);
 }
 
 
@@ -465,6 +507,7 @@ void Game::Update(float deltaTime, float totalTime)
 	Helper(deltaTime);
 	BuildUI();
 
+	entities[0]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
@@ -489,34 +532,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// DRAW geometry
-	// - These steps are generally repeated for EACH object you draw
-	// - Other Direct3D calls will also be necessary to do more complex things
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	{
-		// Set buffers in the input assembler (IA) stage
-		//  - Do this ONCE PER OBJECT, since each object may have different geometry
-		//  - For this demo, this step *could* simply be done once during Init()
-		//  - However, this needs to be done between EACH DrawIndexed() call
-		//     when drawing different geometry, so it's here as an example
-		context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-		context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	for (int i = 0; i < entities.size(); i++) {
+		entities[i]->Draw(context, constBuffer);
+	}
 
-		// Tell Direct3D to draw
-		//  - Begins the rendering pipeline on the GPU
-		//  - Do this ONCE PER OBJECT you intend to draw
-		//  - This will use all currently set Direct3D resources (shaders, buffers, etc)
-		//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-		//     vertices in the currently set VERTEX BUFFER
-		context->DrawIndexed(
-			3,     // The number of indices to use (we could draw a subset if we wanted)
-			0,     // Offset to the first index we want to use
-			0);    // Offset to add to each index when looking up vertices
-	}
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i]->Draw(context);
-	}
+	//entities[0]->Draw(context, constBuffer);
 
 	// Frame END
 	// - These should happen exactly ONCE PER FRAME

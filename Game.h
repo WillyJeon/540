@@ -4,6 +4,7 @@
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include "Mesh.h"
+#include "GameEntity.h"
 
 #include <vector>
 #include <memory>
@@ -29,6 +30,8 @@ private:
 	float color[4];
 	int hand;
 	int cpHand;
+	float tint[4];
+	float offset[3];
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
@@ -56,5 +59,9 @@ private:
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> polygon;
 	std::shared_ptr<Mesh> house;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
+
+	std::vector<std::shared_ptr<GameEntity>> entities;
 };
 
