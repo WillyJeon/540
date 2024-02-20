@@ -49,6 +49,7 @@ Game::Game(HINSTANCE hInstance)
 
 	//color[4] = {};
 	int number = 0;
+	move = 1;
 	bool show = false;
 
 	std::shared_ptr<Mesh> triangle;
@@ -180,6 +181,7 @@ void Game::BuildUI()
 	{
 		show = !show;
 	}
+<<<<<<< Updated upstream
 	ImGui::SliderInt("Choose a number", &number, 0, 100);
 
 	if (ImGui::Button("Press to increment")) 
@@ -187,6 +189,54 @@ void Game::BuildUI()
 		number++;
 	}
 
+=======
+	//ImGui::SliderFloat3("Offset", &offset[0], 0, 1, 0);
+	ImGui::ColorEdit4("Tint", tint);
+
+	if (ImGui::TreeNode("Meshes")) {
+		ImGui::Text("Mesh 1: %i triangle(s)", square->GetIndexCount() / 3);
+		ImGui::Text("Mesh 2: %i triangle(s)", polygon->GetIndexCount() / 3);
+		ImGui::Text("Mesh 3: %i triangle(s)", house->GetIndexCount() / 3);
+
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Entities")) {
+		EntitiesUI(entities);
+		ImGui::TreePop();
+	}
+
+	
+	
+
+	ImGui::End();
+}
+
+void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities) 
+{
+	for (int i = 0; i < entities.size(); i++) {
+		ImGui::PushID(i);
+		if (ImGui::TreeNode("Entity %d", "Entity %d:", i)) {
+			Transforms* transform = entities[i]->GetTransform();
+			XMFLOAT3 pos = transform->GetPosition();
+			XMFLOAT3 rot = transform->GetPitchYawRoll();
+			XMFLOAT3 scale = transform->GetScale();
+			if (ImGui::DragFloat3("Position", &pos.x, 0.1f)) {
+				transform->SetPosition(pos.x, pos.y, pos.z);
+			}
+			if (ImGui::DragFloat3("Rotation (Radians)", &rot.x, 0.1f)) {
+				transform->SetRotation(rot.x, rot.y, rot.z);
+			}
+			if (ImGui::DragFloat3("Scale", &scale.x, 0.1f)) {
+				transform->SetScale(scale.x, scale.y, scale.z);
+			}
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+	}
+	
+>>>>>>> Stashed changes
 
 	//ImGui::Text("Your hand is %i", hand);
 	////ImGui::Text("Computer hand is %i", cpHand);
@@ -451,6 +501,28 @@ void Game::CreateGeometry()
 	meshes.push_back(polygon);
 	meshes.push_back(house);
 	
+<<<<<<< Updated upstream
+=======
+
+	//Entities list
+
+	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(triangle);
+	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(square);
+	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(polygon);
+	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(triangle);
+	std::shared_ptr<GameEntity> entityFive = std::make_shared<GameEntity>(square);
+
+	entityOne->GetTransform()->Rotate(0, 0, .3f);
+	entityTwo->GetTransform()->MoveAbsolute(0.0, 0, 0);
+	entityThree->GetTransform()->MoveAbsolute(-0.7, 0, 0);
+	//entityFour->GetTransform()->MoveAbsolute(-0.7, 0, 0);
+
+	entities.push_back(entityOne);
+	entities.push_back(entityTwo);
+	entities.push_back(entityThree);
+	entities.push_back(entityFour);
+	entities.push_back(entityFive);
+>>>>>>> Stashed changes
 }
 
 
@@ -472,7 +544,40 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	Helper(deltaTime);
 	BuildUI();
+<<<<<<< Updated upstream
 
+=======
+	
+	for (int i = 0; i < 2; i++) {
+		if (entities[i]->GetTransform()->GetPosition().x > 1.0f) {
+			move = -1;
+		}
+		if (entities[i]->GetTransform()->GetPosition().x < -1.0f) {
+			move = 1;
+		}
+		entities[i]->GetTransform()->MoveAbsolute(deltaTime * move, 0, 0);
+		entities[i]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
+	}
+
+	for (int i = 2; i < entities.size()-1; i++) {
+		if (entities[i]->GetTransform()->GetPosition().y > 1.0f) {
+			move = -1;
+		}
+		if (entities[i]->GetTransform()->GetPosition().y < -1.0f) {
+			move = 1;
+		}
+		
+		entities[i]->GetTransform()->MoveAbsolute(0, deltaTime * move, 0);
+		entities[i]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
+	}
+	float scale = (float)cos(totalTime * 2) * 1.0f + 2;
+
+	
+	
+	entities[4]->GetTransform()->SetScale(scale,scale,scale);
+	entities[4]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
+	
+>>>>>>> Stashed changes
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();

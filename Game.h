@@ -29,6 +29,12 @@ private:
 	float color[4];
 	int hand;
 	int cpHand;
+<<<<<<< Updated upstream
+=======
+	float tint[4];
+	float offset[3];
+	float move;
+>>>>>>> Stashed changes
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
