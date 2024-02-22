@@ -6,6 +6,7 @@ Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlan
 	UpdateViewMatrix();
 	UpdateProjectionMatrix(aspectRatio);
 	movementSpeed = 1;	
+	mouseLookSpeed = .1f;
 }
 
 Camera::~Camera()
@@ -40,6 +41,7 @@ void Camera::UpdateViewMatrix()
 void Camera::Update(float dt)
 {
 	float speed = dt * 1;
+	//mouseLookSpeed *= dt;
 	Input& input = Input::GetInstance();
 	if (input.KeyDown('W')) {
 		// Go Forward
@@ -69,8 +71,8 @@ void Camera::Update(float dt)
 
 	if (input.MouseLeftDown())
 	{
-		int cursorMovementX = speed * input.GetMouseXDelta();
-		int cursorMovementY = speed * input.GetMouseYDelta();
+		int cursorMovementX = mouseLookSpeed * input.GetMouseXDelta();
+		int cursorMovementY = mouseLookSpeed * input.GetMouseYDelta();
 		/* Other mouse movement code here */
 		
 		transform.Rotate(cursorMovementY, cursorMovementX, 0);
