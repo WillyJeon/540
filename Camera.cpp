@@ -6,7 +6,7 @@ Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlan
 	UpdateViewMatrix();
 	UpdateProjectionMatrix(aspectRatio);
 	movementSpeed = 1;	
-	mouseLookSpeed = .1f;
+	mouseLookSpeed = .01f;
 }
 
 Camera::~Camera()
