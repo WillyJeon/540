@@ -237,6 +237,15 @@ void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities)
 
 void Game::CamerasUI(std::shared_ptr<Camera>activeCam)
 {
+	if (ImGui::Button("Camera 1")) {
+		activeCam = cam[0];
+	}
+	if (ImGui::Button("Camera 2")) {
+		activeCam = cam[1];
+	}
+	if (ImGui::Button("Camera 3")) {
+		activeCam = cam[2];
+	}
 	if (ImGui::TreeNode("Active Camera", "Active Camera:")) {
 		DirectX::XMFLOAT3 pos = activeCam->GetTransform()->GetPosition();
 		ImGui::Text("Position: %i", pos.x);
