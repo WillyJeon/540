@@ -15,11 +15,13 @@ Transforms* GameEntity::GetTransform()
     return &object;
 }
 
-void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Microsoft::WRL::ComPtr<ID3D11Buffer> buffer)
+void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Microsoft::WRL::ComPtr<ID3D11Buffer> buffer, std::shared_ptr<Camera> cam)
 {
 	BufferStruct bsData;
 	bsData.colorTint = DirectX::XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
 	bsData.worldMatrix = object.GetWorldMatrix();
+	bsData.projection = cam->GetProjectionMatrix();
+	bsData.view = cam->GetViewMatrix();
 
 
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};

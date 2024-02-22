@@ -5,6 +5,7 @@
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include "Mesh.h"
 #include "GameEntity.h"
+#include "Camera.h"
 
 #include <vector>
 #include <memory>
@@ -32,6 +33,8 @@ private:
 	int cpHand;
 	float tint[4];
 	float offset[3];
+	float move;
+	std::shared_ptr<Camera> cam;
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 

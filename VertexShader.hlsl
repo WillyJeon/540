@@ -3,6 +3,9 @@ cbuffer ExternalData: register(b0)
 {
     float4 colorTint;
     matrix worldMatrix;
+    matrix projection;
+    matrix view;
+	
 };
 
 // Struct representing a single vertex worth of data
@@ -48,6 +51,8 @@ VertexToPixel main( VertexShaderInput input )
 {
 	// Set up output struct
 	VertexToPixel output;
+	
+
 
 	// Here we're essentially passing the input position directly through to the next
 	// stage (rasterizer), though it needs to be a 4-component vector now.  
@@ -64,6 +69,9 @@ VertexToPixel main( VertexShaderInput input )
 	// - We don't need to alter it here, but we do need to send it to the pixel shader
 	output.color = input.color * colorTint;
 
+    matrix wvp = mul(projection, mul(view, worldMatrix));
+    output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
+	
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
 	return output;
