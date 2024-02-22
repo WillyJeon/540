@@ -138,9 +138,9 @@ void Game::Init()
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 	device->CreateBuffer(&cbDesc, 0, constBuffer.GetAddressOf());
 
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0, 0, -5), (float)this->windowWidth / this->windowHeight, 0.1, 1000));
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2, 0, -2), ((float)this->windowWidth / this->windowHeight)/2, 0.1, 1000));
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3, 0, -3), ((float)this->windowWidth / this->windowHeight)/3, 0.1, 1000));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0, 0, -5), (float)this->windowWidth / this->windowHeight, 100,  0.1, 1000));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2, 0, -2), ((float)this->windowWidth / this->windowHeight)/2, 60, 0.1, 1000));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3, 0, -3), ((float)this->windowWidth / this->windowHeight)/3, 150, 0.1, 1000));
 	activeCam = cam[0];
 }
 
@@ -202,11 +202,7 @@ void Game::BuildUI()
 		ImGui::TreePop();
 	}
 
-	CamerasUI(activeCam);
-
-	
-	
-
+	CamerasUI();
 	ImGui::End();
 }
 
@@ -219,6 +215,7 @@ void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities)
 			XMFLOAT3 pos = transform->GetPosition();
 			XMFLOAT3 rot = transform->GetPitchYawRoll();
 			XMFLOAT3 scale = transform->GetScale();
+			
 			if (ImGui::DragFloat3("Position", &pos.x, 0.1f)) {
 				transform->SetPosition(pos.x, pos.y, pos.z);
 			}
@@ -235,7 +232,7 @@ void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities)
 	}
 }
 
-void Game::CamerasUI(std::shared_ptr<Camera>activeCam)
+void Game::CamerasUI()
 {
 	if (ImGui::Button("Camera 1")) {
 		activeCam = cam[0];
@@ -246,9 +243,14 @@ void Game::CamerasUI(std::shared_ptr<Camera>activeCam)
 	if (ImGui::Button("Camera 3")) {
 		activeCam = cam[2];
 	}
-	if (ImGui::TreeNode("Active Camera", "Active Camera:")) {
+	if (ImGui::TreeNode("Active Camera", "Active Camera")) {
 		DirectX::XMFLOAT3 pos = activeCam->GetTransform()->GetPosition();
-		ImGui::Text("Position: %i", pos.x);
+		float fov = activeCam->GetFieldOfView();
+		ImGui::Text("X Position: %f", pos.x);
+		ImGui::Text("Y Position: %f", pos.y);
+		ImGui::Text("Z Position: %f", pos.z);
+
+		ImGui::Text("Field Of View: %f", fov);
 		ImGui::TreePop();
 	}
 
@@ -513,7 +515,10 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
-	activeCam->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
+	for (int i = 0; i < cam.size(); i++) {
+		cam[i]->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
+	}
+	
 }
 
 // --------------------------------------------------------

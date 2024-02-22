@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlane, float farClipPlane)
+Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio,float fov, float nearClipPlane, float farClipPlane)
 {
 	transform.SetPosition(position.x, position.y, position.z);
 	UpdateViewMatrix();
@@ -8,7 +8,7 @@ Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlan
 	movementSpeed = 1;
 	mouseLookSpeed = 1;
 	this->position = position;
-	
+	fieldOfView = fov;
 }
 
 Camera::~Camera()
@@ -30,6 +30,13 @@ Transforms* Camera::GetTransform()
 {
 	return &transform;
 }
+
+float Camera::GetFieldOfView()
+{
+	return fieldOfView;
+}
+
+
 
 
 void Camera::UpdateProjectionMatrix(float aspectRatio)
@@ -78,8 +85,8 @@ void Camera::Update(float dt)
 
 	if (input.MouseLeftDown())
 	{
-		int cursorMovementX = mouseLookSpeed * dt * input.GetMouseXDelta();
-		int cursorMovementY = mouseLookSpeed * dt * input.GetMouseYDelta();
+		float cursorMovementX = mouseLookSpeed * dt * input.GetMouseXDelta();
+		float cursorMovementY = mouseLookSpeed * dt * input.GetMouseYDelta();
 		/* Other mouse movement code here */
 		
 		transform.Rotate(cursorMovementY, cursorMovementX, 0);
