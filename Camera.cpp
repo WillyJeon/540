@@ -5,10 +5,7 @@ Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlan
 	transform.SetPosition(position.x, position.y, position.z);
 	UpdateViewMatrix();
 	UpdateProjectionMatrix(aspectRatio);
-	movementSpeed = 1;
-	this->farClipPlane = farClipPlane;
-	this->nearClipPlane = nearClipPlane;
-	
+	movementSpeed = 1;	
 }
 
 Camera::~Camera()
@@ -28,7 +25,7 @@ DirectX::XMFLOAT4X4 Camera::GetProjectionMatrix()
 
 void Camera::UpdateProjectionMatrix(float aspectRatio)
 {
-	DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fieldOfView, aspectRatio, nearClipPlane, farClipPlane));
+	DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fieldOfView, aspectRatio, 0.1f, 1000.0f));
 }
 
 void Camera::UpdateViewMatrix()
@@ -36,7 +33,7 @@ void Camera::UpdateViewMatrix()
 	DirectX::XMFLOAT3 fwd = transform.GetForward();
 	DirectX::XMFLOAT3 pos = transform.GetPosition();
 	
-	DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&fwd), DirectX::XMVectorSet(0,1,0,0)));
+	DirectX::XMStoreFloat4x4(&viewMatrix, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&fwd), DirectX::XMVectorSet(0,1,0,0)));
 
 }
 
@@ -52,28 +49,28 @@ void Camera::Update(float dt)
 		// Go Backward
 		transform.MoveRelative(0, 0, -speed);
 	}
-	if (input.KeyDown('A')) {
+	if (input.KeyDown('D')) {
 		// Go Left
 		transform.MoveRelative(-speed, 0, 0);
 	}
-	if (input.KeyDown('D')) {
+	if (input.KeyDown('A')) {
 		// Go Right
 		transform.MoveRelative(speed, 0, 0);
 	}
 
 	if (input.KeyDown(VK_SPACE)) {
 		// Move up
-		transform.MoveRelative(0, speed, 0);
+		transform.MoveRelative(0, -speed, 0);
 	}
 	if (input.KeyDown('X')) {
 		// Move down
-		transform.MoveRelative(0, -speed, 0);
+		transform.MoveRelative(0, speed, 0);
 	}
 
 	if (input.MouseLeftDown())
 	{
-		int cursorMovementX = input.GetMouseXDelta();
-		int cursorMovementY = input.GetMouseYDelta();
+		int cursorMovementX = speed * input.GetMouseXDelta();
+		int cursorMovementY = speed * input.GetMouseYDelta();
 		/* Other mouse movement code here */
 		
 		transform.Rotate(cursorMovementY, cursorMovementX, 0);

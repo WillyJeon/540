@@ -34,7 +34,7 @@ private:
 	float tint[4];
 	float offset[3];
 	float move;
-	std::shared_ptr<Camera> cam;
+	std::vector<std::shared_ptr<Camera>> cam;
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 

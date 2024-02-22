@@ -41,7 +41,6 @@ DirectX::XMFLOAT3 Transforms::GetRight()
 {
 	DirectX::XMVECTOR quat = DirectX::XMQuaternionRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&pitchYawRoll));
 	DirectX::XMVECTOR rot = DirectX::XMVector3Rotate(DirectX::XMVectorSet(1, 0, 0, 0), quat);
-	//XMStoreFloat3(&translation, XMLoadFloat3(&translation) + dir);
 	DirectX::XMFLOAT3 dir;
 	DirectX::XMStoreFloat3(&dir, rot);
 	return dir;
@@ -51,7 +50,6 @@ DirectX::XMFLOAT3 Transforms::GetUp()
 {
 	DirectX::XMVECTOR quat = DirectX::XMQuaternionRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&pitchYawRoll));
 	DirectX::XMVECTOR rot = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), quat);
-	//XMStoreFloat3(&translation, XMLoadFloat3(&translation) + dir);
 	DirectX::XMFLOAT3 dir;
 	DirectX::XMStoreFloat3(&dir, rot);
 	return dir;
@@ -61,7 +59,6 @@ DirectX::XMFLOAT3 Transforms::GetForward()
 {
 	DirectX::XMVECTOR quat = DirectX::XMQuaternionRotationRollPitchYawFromVector(DirectX::XMLoadFloat3(&pitchYawRoll));
 	DirectX::XMVECTOR rot = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 0, 1, 0), quat);
-	//XMStoreFloat3(&translation, XMLoadFloat3(&translation) + dir);
 	DirectX::XMFLOAT3 dir;
 	DirectX::XMStoreFloat3(&dir, rot);
 	return dir;

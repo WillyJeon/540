@@ -138,7 +138,7 @@ void Game::Init()
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 	device->CreateBuffer(&cbDesc, 0, constBuffer.GetAddressOf());
 
-	cam = std::make_shared<Camera>(DirectX::XMFLOAT3(0,0, -5), (float)this->windowWidth / this->windowHeight, 0.1, 1000);
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f), (float)this->windowWidth / this->windowHeight, 0.1f, 1000.0f));
 }
 
 void Game::Helper(float deltaTime) {
@@ -489,7 +489,7 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
-	cam->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
+	cam[0]->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
 }
 
 // --------------------------------------------------------
@@ -499,7 +499,7 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	Helper(deltaTime);
 	BuildUI();
-	cam->Update(deltaTime);
+	cam[0]->Update(deltaTime);
 	
 	for (int i = 0; i < 2; i++) {
 		if (entities[i]->GetTransform()->GetPosition().x > 1.0f) {
@@ -555,7 +555,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i]->Draw(context, constBuffer, cam);
+		entities[i]->Draw(context, constBuffer, cam[0]);
 	}
 
 	//entities[0]->Draw(context, constBuffer);
