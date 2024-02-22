@@ -34,14 +34,16 @@ private:
 	float tint[4];
 	float offset[3];
 	float move;
-	std::shared_ptr<Camera> cam;
+	std::vector<std::shared_ptr<Camera>> cam;
 
+	std::shared_ptr<Camera > activeCam;
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
 	void CreateGeometry();
 	void Helper(float deltaTime);
 	void BuildUI();
 	void EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities);
+	void CamerasUI(std::shared_ptr<Camera> cameras);
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the

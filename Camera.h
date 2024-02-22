@@ -15,11 +15,16 @@ private:
 	float farClipPlane;
 	float movementSpeed;
 	float mouseLookSpeed;
+
+	DirectX::XMFLOAT3 position;
+	float aspectRatio;
+
 public:
 	Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlane, float farClipPlane);
 	~Camera();
 	DirectX::XMFLOAT4X4 GetViewMatrix();
 	DirectX::XMFLOAT4X4 GetProjectionMatrix();
+	Transforms* GetTransform();
 
 	void UpdateProjectionMatrix(float aspectRatio);
 	void UpdateViewMatrix();

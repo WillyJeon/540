@@ -7,6 +7,7 @@ Camera::Camera(DirectX::XMFLOAT3 position, float aspectRatio, float nearClipPlan
 	UpdateProjectionMatrix(aspectRatio);
 	movementSpeed = 1;
 	mouseLookSpeed = 1;
+	this->position = position;
 	
 }
 
@@ -25,6 +26,12 @@ DirectX::XMFLOAT4X4 Camera::GetProjectionMatrix()
 	return projectionMatrix;
 }
 
+Transforms* Camera::GetTransform()
+{
+	return &transform;
+}
+
+
 void Camera::UpdateProjectionMatrix(float aspectRatio)
 {
 	DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fieldOfView, aspectRatio, 0.1, 1000));
@@ -33,9 +40,9 @@ void Camera::UpdateProjectionMatrix(float aspectRatio)
 void Camera::UpdateViewMatrix()
 {
 	DirectX::XMFLOAT3 fwd = transform.GetForward();
-	DirectX::XMFLOAT3 pos = transform.GetPosition();
+	position = transform.GetPosition();
 	
-	DirectX::XMStoreFloat4x4(&viewMatrix, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&fwd), DirectX::XMVectorSet(0,1,0,0)));
+	DirectX::XMStoreFloat4x4(&viewMatrix, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&position), DirectX::XMLoadFloat3(&fwd), DirectX::XMVectorSet(0,1,0,0)));
 
 }
 

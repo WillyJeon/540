@@ -138,7 +138,10 @@ void Game::Init()
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 	device->CreateBuffer(&cbDesc, 0, constBuffer.GetAddressOf());
 
-	cam = std::make_shared<Camera>(DirectX::XMFLOAT3(0,0, -5), (float)this->windowWidth / this->windowHeight, 0.1, 1000);
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0, 0, -5), (float)this->windowWidth / this->windowHeight, 0.1, 1000));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2, 0, -2), ((float)this->windowWidth / this->windowHeight)/2, 0.1, 1000));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3, 0, -3), ((float)this->windowWidth / this->windowHeight)/3, 0.1, 1000));
+	activeCam = cam[0];
 }
 
 void Game::Helper(float deltaTime) {
@@ -199,6 +202,8 @@ void Game::BuildUI()
 		ImGui::TreePop();
 	}
 
+	CamerasUI(activeCam);
+
 	
 	
 
@@ -228,7 +233,17 @@ void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities)
 		ImGui::PopID();
 
 	}
-	
+}
+
+void Game::CamerasUI(std::shared_ptr<Camera>activeCam)
+{
+	if (ImGui::TreeNode("Active Camera", "Active Camera:")) {
+		DirectX::XMFLOAT3 pos = activeCam->GetTransform()->GetPosition();
+		ImGui::Text("Position: %i", pos.x);
+		ImGui::TreePop();
+	}
+
+
 
 
 }
@@ -489,7 +504,7 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
-	cam->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
+	activeCam->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
 }
 
 // --------------------------------------------------------
@@ -499,7 +514,7 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	Helper(deltaTime);
 	BuildUI();
-	cam->Update(deltaTime);
+	activeCam->Update(deltaTime);
 	
 	for (int i = 0; i < 2; i++) {
 		if (entities[i]->GetTransform()->GetPosition().x > 1.0f) {
@@ -555,7 +570,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i]->Draw(context, constBuffer, cam);
+		entities[i]->Draw(context, constBuffer, activeCam);
 	}
 
 	//entities[0]->Draw(context, constBuffer);
