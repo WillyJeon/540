@@ -133,13 +133,13 @@ void Game::Init()
 	
 	
 
-	unsigned int size = sizeof(BufferStruct);
-	size = (size + 15) / 16 * 16;
-	D3D11_BUFFER_DESC cbDesc = {};
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbDesc.ByteWidth = size;
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//unsigned int size = sizeof(BufferStruct);
+	//size = (size + 15) / 16 * 16;
+	//D3D11_BUFFER_DESC cbDesc = {};
+	//cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	//cbDesc.ByteWidth = size;
+	//cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	//cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 
 	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0, 0, -5), (float)this->windowWidth / this->windowHeight, 100,  0.1, 1000));
 	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2, 0, -2), ((float)this->windowWidth / this->windowHeight)/2, 60, 0.1, 1000));
@@ -435,15 +435,15 @@ void Game::CreateGeometry()
 
 	//Entities list
 
-	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(triangle);
-	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(square);
-	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(polygon);
-	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(triangle);
-	std::shared_ptr<GameEntity> entityFive = std::make_shared<GameEntity>(square);
+	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(triangle, materials[0]);
+	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(square, materials[0]);
+	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(polygon, materials[0]);
+	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(triangle, materials[1]);
+	std::shared_ptr<GameEntity> entityFive = std::make_shared<GameEntity>(square, materials[0]);
 
 	entityOne->GetTransform()->Rotate(0, 0, .3f);
 	entityTwo->GetTransform()->MoveAbsolute(0.0, 0, 0);
-	entityThree->GetTransform()->MoveAbsolute(-0.7, 0, 0);
+	entityThree->GetTransform()->MoveAbsolute(-0.7f, 0, 0);
 	//entityFour->GetTransform()->MoveAbsolute(-0.7, 0, 0);
 
 	entities.push_back(entityOne);

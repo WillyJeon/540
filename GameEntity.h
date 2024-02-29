@@ -4,7 +4,6 @@
 #include <memory>
 #include "Mesh.h"
 #include "Transforms.h"
-#include "BufferStructs.h"
 #include "Camera.h"
 #include "Material.h"
 

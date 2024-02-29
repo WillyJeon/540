@@ -1,8 +1,8 @@
 #include "GameEntity.h"
 
-GameEntity::GameEntity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) : mesh(mesh)
+GameEntity::GameEntity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material) : mesh(mesh), material(material)
 {
-	this->material = material;
+	
 }
 
 std::shared_ptr<Mesh> GameEntity::GetMesh()
@@ -19,7 +19,7 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
 {
 	std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
 	vs->SetFloat4("colorTint", material->GetColorTint()); // Strings here MUST
-	vs->SetMatrix4x4("world", object.GetWorldMatrix()); // match variable
+	vs->SetMatrix4x4("worldMatrix", object.GetWorldMatrix()); // match variable
 	vs->SetMatrix4x4("view", cam->GetViewMatrix()); // names in your
 	vs->SetMatrix4x4("projection", cam->GetProjectionMatrix()); // shader’s cbuffer!
 
@@ -32,12 +32,12 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
 	
 
 
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+	/*D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 	context->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
 	memcpy(mappedBuffer.pData, &bsData, sizeof(bsData));
-	context->Unmap(buffer.Get(), 0);
+	context->Unmap(buffer.Get(), 0);*/
 
-	context->VSSetConstantBuffers(0, 1, buffer.GetAddressOf());
+	//context->VSSetConstantBuffers(0, 1, vs.GetAddressOf());
 
 	material->GetVertexShader()->SetShader();
 	material->GetPixelShader()->SetShader();

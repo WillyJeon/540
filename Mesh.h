@@ -3,7 +3,6 @@
 #include <d3d11.h>
 #include "Vertex.h"
 #include <DirectXMath.h>
-#include "BufferStructs.h"
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 
 class Mesh
