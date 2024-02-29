@@ -7,6 +7,7 @@
 #include "GameEntity.h"
 #include "Camera.h"
 #include "SimpleShader.h"
+#include "Material.h"
 
 #include <vector>
 #include <memory>
@@ -66,7 +67,7 @@ private:
 	std::shared_ptr<Mesh> polygon;
 	std::shared_ptr<Mesh> house;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
+	std::vector<std::shared_ptr<Material>> materials;
 
 	std::vector<std::shared_ptr<GameEntity>> entities;
 };

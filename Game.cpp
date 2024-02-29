@@ -6,6 +6,7 @@
 #include <stdio.h>      
 #include <stdlib.h>    
 #include "Mesh.h"
+#include "Material.h"
 
 // This code assumes files are in "ImGui" subfolder!
 // Adjust as necessary for your own folder structure and project setup
@@ -58,7 +59,6 @@ Game::Game(HINSTANCE hInstance)
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> polygon;
 	std::shared_ptr<Mesh> house;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constBuffer;
 
 	
 }
@@ -106,6 +106,12 @@ void Game::Init()
 	LoadShaders();
 	CreateGeometry();
 	
+
+	// Set Materials
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1,0,0,1), vertexShader, pixelShader));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.5,0.5,0,1), vertexShader, pixelShader));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(0,0,1,1), vertexShader, pixelShader));
+	
 	// Set initial graphics API state
 	//  - These settings persist until we change them
 	//  - Some of these, like the primitive topology & input layout, probably won't change
@@ -134,7 +140,6 @@ void Game::Init()
 	cbDesc.ByteWidth = size;
 	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
-	device->CreateBuffer(&cbDesc, 0, constBuffer.GetAddressOf());
 
 	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0, 0, -5), (float)this->windowWidth / this->windowHeight, 100,  0.1, 1000));
 	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2, 0, -2), ((float)this->windowWidth / this->windowHeight)/2, 60, 0.1, 1000));
@@ -527,7 +532,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i]->Draw(context, constBuffer, activeCam);
+		entities[i]->Draw(context, activeCam);
 	}
 
 	//entities[0]->Draw(context, constBuffer);
