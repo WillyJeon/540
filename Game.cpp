@@ -411,10 +411,10 @@ void Game::CreateGeometry()
 	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>(FixPath("../../Assets/helix.obj").c_str(), device);
 	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>(FixPath("../../Assets/sphere.obj").c_str(), device);
 	// Set Materials
-	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT4(1, 0, 0, 1), vertexShader, pixelShader);
-	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT4(0.5f, 0.5f, 0, 1), vertexShader, pixelShader);
-	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShader);
-	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShaderNew);
+	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT4(1, 0, 0, 1), vertexShader, pixelShader, 1);
+	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT4(0.5f, 0.5f, 0, 1), vertexShader, pixelShader, 1);
+	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShader, 1);
+	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShaderNew, 1);
 
 
 	materials.push_back(material1);

@@ -1,3 +1,4 @@
+#include "ShaderIncludes.hlsli"
 
 cbuffer ExternalData : register(b0)
 {
@@ -9,17 +10,6 @@ cbuffer ExternalData : register(b0)
 // - The name of the struct itself is unimportant
 // - The variable names don't have to match other shaders (just the semantics)
 // - Each variable must have a semantic, which defines its usage
-struct VertexToPixel
-{
-	// Data type
-	//  |
-	//  |   Name          Semantic
-	//  |    |                |
-	//  v    v                v
-	float4 screenPosition	: SV_POSITION;
-    float3 normal : NORMAL;
-    float2 uv : TEXCOORD;
-};
 
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
