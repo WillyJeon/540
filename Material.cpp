@@ -5,6 +5,7 @@ Material::Material(XMFLOAT4 colorTint, shared_ptr<SimpleVertexShader> vertexShad
     this->colorTint = colorTint;
     this->vertexShader = vertexShader;
     this->pixelShader = pixelShader;
+
 }
 
 Material::~Material()
@@ -40,3 +41,4 @@ void Material::SetPixelShader(shared_ptr<SimplePixelShader> pixelShader)
 {
     this->pixelShader = pixelShader;
 }
+
