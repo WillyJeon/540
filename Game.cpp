@@ -102,7 +102,12 @@ void Game::Init()
 	CreateGeometry();
 	
 
-	
+	directionalLight1 = {};
+
+	directionalLight1.Type = LIGHT_TYPE_DIRECTIONAL;
+	directionalLight1.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	directionalLight1.Color = XMFLOAT3(0.2, 0.2, 1.0);
+	directionalLight1.Intensity = 1.0f;
 	
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -523,7 +528,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
-	entities[3]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
+	
+	for (int i = 1; i < entities.size(); i++) {
+		entities[i]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
+		entities[i]->GetMaterial()->GetPixelShader()->SetData("directionalLight1", &directionalLight1, sizeof(Light));
+	}
 	for (int i = 0; i < entities.size(); i++) {
 		entities[i]->Draw(context, activeCam);
 	}

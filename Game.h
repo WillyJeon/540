@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "SimpleShader.h"
 #include "Material.h"
+#include "Lights.h"
 
 #include <vector>
 #include <memory>
@@ -39,6 +40,7 @@ private:
 	std::vector<std::shared_ptr<Camera>> cam;
 
 	DirectX::XMFLOAT3 ambientColor;
+	Light directionalLight1;
 
 	std::shared_ptr<Camera > activeCam;
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
