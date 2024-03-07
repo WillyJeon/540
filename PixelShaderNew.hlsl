@@ -49,13 +49,13 @@ float4 main(VertexToPixel input) : SV_TARGET
 	
     float2 xy = (2.0f * input.uv.xy * resolution.xy/2) / resolution.y;
 	
-    float3 center = float3(0.5, 0, .5);
+    float3 center = float3(0.5, 0, 0.5);
     
     float3 pp = 0;
     
     float somethin = 50;
 	
-    const float count = 200.0f;
+    const float count = 100.0f;
 	
     for (int i = 0; i < count; i++)
     {
@@ -65,7 +65,7 @@ float4 main(VertexToPixel input) : SV_TARGET
         
         float2 temp = float2(center.x + cos(angle) * rand, center.z + sin(angle) * rand);
         
-        float dist = distance(input.uv.xy, temp);
+        float dist = distance(input.uv, temp);
         somethin = min(somethin, dist);
         
         if (somethin == dist)
