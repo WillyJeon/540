@@ -58,14 +58,10 @@ private:
 	
 	// Shaders and shader-related constructs
 	std::shared_ptr<SimplePixelShader> pixelShader;
+	std::shared_ptr<SimplePixelShader> pixelShaderNew;
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 
 	std::vector<std::shared_ptr<Mesh>> meshes;
-
-	std::shared_ptr<Mesh> triangle;
-	std::shared_ptr<Mesh> square;
-	std::shared_ptr<Mesh> polygon;
-	std::shared_ptr<Mesh> house;
 
 	std::vector<std::shared_ptr<Material>> materials;
 

@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include <wrl/client.h> 
 #include "SimpleShader.h"
+#include "Camera.h"
 
 #include <vector>
 #include <memory>
@@ -29,5 +30,8 @@ public:
 	void SetColorTint(XMFLOAT4 colorTint);
 	void SetVertexShader(shared_ptr<SimpleVertexShader> vertexShader);
 	void SetPixelShader(shared_ptr<SimplePixelShader> pixelShader);
+	void SetTime(float time);
+	
+
 };
 

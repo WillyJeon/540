@@ -41,7 +41,7 @@ float Camera::GetFieldOfView()
 
 void Camera::UpdateProjectionMatrix(float aspectRatio)
 {
-	DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fieldOfView, aspectRatio, 0.1, 1000));
+	DirectX::XMStoreFloat4x4(&projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(fieldOfView, aspectRatio, 0.1f, 1000.0f));
 }
 
 void Camera::UpdateViewMatrix()

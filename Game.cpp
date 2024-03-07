@@ -54,12 +54,6 @@ Game::Game(HINSTANCE hInstance)
 	int number = 0;
 	move = 1;
 	bool show = false;
-
-	std::shared_ptr<Mesh> triangle;
-	std::shared_ptr<Mesh> square;
-	std::shared_ptr<Mesh> polygon;
-	std::shared_ptr<Mesh> house;
-
 	
 }
 
@@ -107,10 +101,7 @@ void Game::Init()
 	CreateGeometry();
 	
 
-	// Set Materials
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1,0,0,1), vertexShader, pixelShader));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.5,0.5,0,1), vertexShader, pixelShader));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(0,0,1,1), vertexShader, pixelShader));
+	
 	
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -141,9 +132,9 @@ void Game::Init()
 	//cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	//cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0, 0, -5), (float)this->windowWidth / this->windowHeight, 100,  0.1, 1000));
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2, 0, -2), ((float)this->windowWidth / this->windowHeight)/2, 60, 0.1, 1000));
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3, 0, -3), ((float)this->windowWidth / this->windowHeight)/3, 150, 0.1, 1000));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f), (float)this->windowWidth / this->windowHeight, 100.0f,  0.1f, 1000.0f));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2.0f, 0.0f, -2.0f), ((float)this->windowWidth / this->windowHeight)/2.0f, 60.0f, 0.1f, 1000.0f));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3.0f, 0.0f, -3.0f), ((float)this->windowWidth / this->windowHeight)/3.0f, 150.0f, 0.1f, 1000.0f));
 	activeCam = cam[0];
 }
 
@@ -192,13 +183,6 @@ void Game::BuildUI()
 	//ImGui::SliderFloat3("Offset", &offset[0], 0, 1, 0);
 	ImGui::ColorEdit4("Tint", tint);
 
-	if (ImGui::TreeNode("Meshes")) {
-		ImGui::Text("Mesh 1: %i triangle(s)", square->GetIndexCount() / 3);
-		ImGui::Text("Mesh 2: %i triangle(s)", polygon->GetIndexCount() / 3);
-		ImGui::Text("Mesh 3: %i triangle(s)", house->GetIndexCount() / 3);
-
-		ImGui::TreePop();
-	}
 
 	if (ImGui::TreeNode("Entities")) {
 		EntitiesUI(entities);
@@ -276,6 +260,8 @@ void Game::LoadShaders()
 		FixPath(L"VertexShader.cso").c_str());
 	pixelShader = std::make_shared<SimplePixelShader>(device, context,
 		FixPath(L"PixelShader.cso").c_str());
+	pixelShaderNew = std::make_shared<SimplePixelShader>(device, context,
+		FixPath(L"PixelShaderNew.cso").c_str());
 
 }
 
@@ -290,9 +276,9 @@ void Game::CreateGeometry()
 
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
-	XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green	= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue	= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT3 red	= XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 green	= XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 blue	= XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in CPU memory
@@ -420,37 +406,41 @@ void Game::CreateGeometry()
 	};
 
 	unsigned int indices4[] = { 0, 1, 2, 3, 4, 5, 4 , 6, 5 };
-	
+	std::shared_ptr<Mesh> cube = std::make_shared<Mesh>(FixPath("../../Assets/cube.obj").c_str(), device);
+	std::shared_ptr<Mesh> cylinder = std::make_shared<Mesh>(FixPath("../../Assets/cylinder.obj").c_str(), device);
+	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>(FixPath("../../Assets/helix.obj").c_str(), device);
+	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>(FixPath("../../Assets/sphere.obj").c_str(), device);
+	// Set Materials
+	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT4(1, 0, 0, 1), vertexShader, pixelShader);
+	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT4(0.5f, 0.5f, 0, 1), vertexShader, pixelShader);
+	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShader);
+	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShaderNew);
 
-	triangle = std::make_shared<Mesh>(vert1, indices1, 3, 3, device);
-	square = std::make_shared<Mesh>(vert2, indices2, 6, 4, device);
-	polygon = std::make_shared<Mesh>(vert3, indices3, 9, 6, device);
-	house = std::make_shared<Mesh>(vert4, indices4, 9, 7, device);
 
-	meshes.push_back(triangle);
-	meshes.push_back(square);
-	meshes.push_back(polygon);
-	meshes.push_back(house);
-	
-
+	materials.push_back(material1);
+	materials.push_back(material2);
+	materials.push_back(material3);
+	materials.push_back(material4);
 	//Entities list
 
-	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(triangle, materials[0]);
-	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(square, materials[0]);
-	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(polygon, materials[0]);
-	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(triangle, materials[1]);
-	std::shared_ptr<GameEntity> entityFive = std::make_shared<GameEntity>(square, materials[0]);
+	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(cube, material4);
+	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(cylinder, material2);
+	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(helix, material3);
+	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(sphere, material1);
+	//std::shared_ptr<GameEntity> entityFive = std::make_shared<GameEntity>(square, material3);
 
-	entityOne->GetTransform()->Rotate(0, 0, .3f);
-	entityTwo->GetTransform()->MoveAbsolute(0.0, 0, 0);
-	entityThree->GetTransform()->MoveAbsolute(-0.7f, 0, 0);
-	//entityFour->GetTransform()->MoveAbsolute(-0.7, 0, 0);
+	//entityOne->GetTransform()->Rotate(0, 0, .3f);
+	//entityTwo->GetTransform()->MoveAbsolute(0.0, 0, 0);
+	entityThree->GetTransform()->MoveAbsolute(-4.0f, 0, 0);
+	entityTwo->GetTransform()->MoveAbsolute(4.0f, 0, 0);
+	entityFour->GetTransform()->MoveAbsolute(8.0f, 0.0f, 0);
+
+
 
 	entities.push_back(entityOne);
 	entities.push_back(entityTwo);
 	entities.push_back(entityThree);
 	entities.push_back(entityFour);
-	entities.push_back(entityFive);
 }
 
 
@@ -477,8 +467,10 @@ void Game::Update(float deltaTime, float totalTime)
 	Helper(deltaTime);
 	BuildUI();
 	activeCam->Update(deltaTime);
+	entities[0]->GetMaterial()->GetPixelShader() ->SetFloat("time", totalTime);
+	entities[0]->GetMaterial()->GetPixelShader()->SetFloat2("resolution", XMFLOAT2(windowWidth, windowHeight));
 	
-	for (int i = 0; i < 2; i++) {
+	/*for (int i = 0; i < 2; i++) {
 		if (entities[i]->GetTransform()->GetPosition().x > 1.0f) {
 			move = -1;
 		}
@@ -500,12 +492,12 @@ void Game::Update(float deltaTime, float totalTime)
 		entities[i]->GetTransform()->MoveAbsolute(0, deltaTime * move, 0);
 		entities[i]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
 	}
-	float scale = (float)cos(totalTime * 2) * 1.0f + 2;
+	float scale = (float)cos(totalTime * 2.0f) * 1.0f + 2.0f;
 
 	
 	
 	entities[4]->GetTransform()->SetScale(scale,scale,scale);
-	entities[4]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
+	entities[4]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);*/
 	
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
