@@ -54,6 +54,7 @@ Game::Game(HINSTANCE hInstance)
 	int number = 0;
 	move = 1;
 	bool show = false;
+	ambientColor = DirectX::XMFLOAT3(0.1f, 0.1f, 0.25f);
 	
 }
 
@@ -411,10 +412,10 @@ void Game::CreateGeometry()
 	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>(FixPath("../../Assets/helix.obj").c_str(), device);
 	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>(FixPath("../../Assets/sphere.obj").c_str(), device);
 	// Set Materials
-	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT4(1, 0, 0, 1), vertexShader, pixelShader, 1);
-	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT4(0.5f, 0.5f, 0, 1), vertexShader, pixelShader, 1);
-	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShader, 1);
-	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT4(0, 0, 1, 1), vertexShader, pixelShaderNew, 1);
+	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 1.0f);
+	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT4(0.5f, 0.5f, 0.0f, 1.0f), vertexShader, pixelShader, 1.0f);
+	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), vertexShader, pixelShader, 1.0f);
+	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), vertexShader, pixelShaderNew, 1.0f);
 
 
 	materials.push_back(material1);
@@ -522,7 +523,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
-
+	entities[3]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
 	for (int i = 0; i < entities.size(); i++) {
 		entities[i]->Draw(context, activeCam);
 	}

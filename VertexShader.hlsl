@@ -14,16 +14,17 @@ cbuffer ExternalData: register(b0)
 // - The name of the struct itself is unimportant, but should be descriptive
 // - Each variable must have a semantic, which defines its usage
 struct VertexShaderInput
-{ 
+{
 	// Data type
 	//  |
 	//  |   Name          Semantic
 	//  |    |                |
 	//  v    v                v
-	float3 localPosition	: POSITION;     // XYZ position
+    float3 localPosition : POSITION; // XYZ position
     float3 normal : NORMAL; // RGBA color
     float2 uv : TEXCOORD;
 };
+
 
 // Struct representing the data we're sending down the pipeline
 // - Should match our pixel shader's input (hence the name: Vertex to Pixel)
@@ -63,7 +64,7 @@ VertexToPixel main( VertexShaderInput input )
     matrix wvp = mul(projection, mul(view, worldMatrix));
     output.screenPosition = mul(wvp, float4(input.localPosition, 1.0f));
     output.uv = input.uv;
-    output.normal = input.normal;
+    output.normal = mul((float3x3)worldMatrix, input.normal);
 	
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)

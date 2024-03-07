@@ -38,6 +38,8 @@ private:
 	float move;
 	std::vector<std::shared_ptr<Camera>> cam;
 
+	DirectX::XMFLOAT3 ambientColor;
+
 	std::shared_ptr<Camera > activeCam;
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 

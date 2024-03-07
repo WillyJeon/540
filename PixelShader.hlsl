@@ -3,6 +3,9 @@
 cbuffer ExternalData : register(b0)
 {
     float4 colorTint;
+    float3 cameraPosition;
+    float roughness;
+    float3 ambient;
 	
 };
 // Struct representing the data we expect to receive from earlier pipeline stages
@@ -28,5 +31,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//   of the triangle we're rendering
 	
     
-    return colorTint;
+    return float4(ambient, 1);
 }
