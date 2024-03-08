@@ -1,18 +1,15 @@
 #include "Material.h"
 
-Material::Material(XMFLOAT4 colorTint, shared_ptr<SimpleVertexShader> vertexShader, shared_ptr<SimplePixelShader> pixelShader, float roughness)
+Material::Material(XMFLOAT3 colorTint, shared_ptr<SimpleVertexShader> vertexShader, shared_ptr<SimplePixelShader> pixelShader, float roughness)
+    : colorTint(colorTint), vertexShader(vertexShader), pixelShader(pixelShader), roughness(roughness)
 {
-    this->colorTint = colorTint;
-    this->vertexShader = vertexShader;
-    this->pixelShader = pixelShader;
-    this->roughness = roughness;
 }
 
 Material::~Material()
 {
 }
 
-XMFLOAT4 Material::GetColorTint()
+XMFLOAT3 Material::GetColorTint()
 {
     return colorTint;
 }
@@ -32,7 +29,7 @@ float Material::GetRoughness()
     return roughness;
 }
 
-void Material::SetColorTint(XMFLOAT4 colorTint)
+void Material::SetColorTint(XMFLOAT3 colorTint)
 {
     this->colorTint = colorTint;
 }

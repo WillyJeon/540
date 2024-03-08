@@ -17,11 +17,11 @@ struct Light {
 };
 cbuffer ExternalData : register(b0)
 {
-    float4 colorTint;
+    float3 colorTint;
     float3 cameraPosition;
     float roughness;
     float3 ambient;
-	Light directionalLight1;
+	Light lights[5];
 	
 };
 
@@ -40,14 +40,86 @@ cbuffer ExternalData : register(b0)
 // - Has a special semantic (SV_TARGET), which means 
 //    "put the output of this into the current render target"
 // - Named "main" because that's the default the shader compiler looks for
+
+
 // --------------------------------------------------------
+
+float Diffuse(float3 normal, float3 direction)
+{
+    return saturate(dot(normal, direction));
+}
+
+
+float Specular(float3 normal, float3 direction, float roughness, float3 cam)
+{
+    float3 ref = reflect(-direction, normal);
+	
+    return roughness == 1 ? 0.0f : pow(max(dot(cam, ref), 0), (1 - roughness) * 256);
+}
+
+
+float Attenuate(Light light, float3 worldPos)
+{
+    float dist = distance(light.Position, worldPos);
+    float att = saturate(1.0f - (dist * dist / (light.Range * light.Range)));
+    return att * att;
+}
+
+
+float3 DirectionalLight(float3 normal, float3 position, float roughness, float3 cam, Light light, float3 color)
+{
+    float3 toLight = normalize(-light.Direction);
+    float3 toCamera = normalize(cam - position);
+    
+    return (Diffuse(normal, toLight) * color + Specular(normal, toLight, roughness, toCamera)) * light.Intensity * light.Color;
+}
+
+float3 PointLight(float3 normal, float3 position, float roughness, float3 cam, Light light, float3 color)
+{
+    float3 toLight = normalize(-light.Direction);
+    float3 toCamera = normalize(cam - position);
+    
+    return (Diffuse(normal, toLight) * color + Specular(normal, toLight, roughness, toCamera)) * Attenuate(light, position) * light.Intensity * light.Color;
+
+}
+
 float4 main(VertexToPixel input) : SV_TARGET
 {
 	// Just return the input color
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
-	input.normal = normalize(input.normal);
+    input.normal = normalize(input.normal);
+	
+	
+	//Ambient
+    float3 finalColor = ambient * colorTint;
+	
+	
+    for (int i = 0; i < 5; i++)
+    {
+        Light light = lights[i];
+        light.Direction = normalize(light.Direction);
+        // Directional
+        switch (light.Type)
+        {
+            case LIGHT_TYPE_DIRECTIONAL: 
+                finalColor += DirectionalLight(input.normal, input.worldPosition, roughness, cameraPosition, light, colorTint);
+                break;
+            
+            case LIGHT_TYPE_POINT:
+                finalColor += PointLight(input.normal, input.worldPosition, roughness, cameraPosition, light, colorTint);
+                break;
+            
+            case LIGHT_TYPE_SPOT:
+                break;
+            
+            
+        }
+
     
-    return float4(directionalLight1.Color, 1);
+	
+    
+        return float4(finalColor, 1);
+    }
 }

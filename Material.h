@@ -14,22 +14,22 @@ using namespace std;
 class Material
 {
 private:
-	XMFLOAT4 colorTint;
+	XMFLOAT3 colorTint;
 	shared_ptr<SimpleVertexShader> vertexShader;
 	shared_ptr<SimplePixelShader> pixelShader;
 	float roughness;
 
 public:
-	Material(XMFLOAT4 colorTint, shared_ptr<SimpleVertexShader> vertexShader, shared_ptr<SimplePixelShader> pixelShader, float roughness);
+	Material(XMFLOAT3 colorTint, shared_ptr<SimpleVertexShader> vertexShader, shared_ptr<SimplePixelShader> pixelShader, float roughness);
 	~Material();
 
-	XMFLOAT4 GetColorTint();
+	XMFLOAT3 GetColorTint();
 	shared_ptr<SimpleVertexShader> GetVertexShader();
 	shared_ptr<SimplePixelShader> GetPixelShader();
 	float GetRoughness();
 
 
-	void SetColorTint(XMFLOAT4 colorTint);
+	void SetColorTint(XMFLOAT3 colorTint);
 	void SetVertexShader(shared_ptr<SimpleVertexShader> vertexShader);
 	void SetPixelShader(shared_ptr<SimplePixelShader> pixelShader);
 	void SetRoughness(float roughness);

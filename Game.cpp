@@ -42,7 +42,8 @@ Game::Game(HINSTANCE hInstance)
 	hand(0),
 	cpHand(0),
 	tint{1.0f, 0.5f, 0.5f, 1.0f},
-	offset{0,0,0}
+	offset{0,0,0}, 
+	ambientColor(0.1f, 0.1f, 0.25f)
 {
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -50,11 +51,9 @@ Game::Game(HINSTANCE hInstance)
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
 
-	//color[4] = {};
 	int number = 0;
 	move = 1;
 	bool show = false;
-	ambientColor = DirectX::XMFLOAT3(0.1f, 0.1f, 0.25f);
 	
 }
 
@@ -101,13 +100,45 @@ void Game::Init()
 	LoadShaders();
 	CreateGeometry();
 	
+	Light light1 = {};
+	Light light2 = {};
+	Light light3 = {};
+	Light pointLight1 = {};
+	Light pointLight2 = {};
+	
 
-	directionalLight1 = {};
+	light1.Type = LIGHT_TYPE_DIRECTIONAL;
+	light1.Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	light1.Color = XMFLOAT3(1.0, 0.0, 0.0);
+	light1.Intensity = 1.0f;
 
-	directionalLight1.Type = LIGHT_TYPE_DIRECTIONAL;
-	directionalLight1.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	directionalLight1.Color = XMFLOAT3(0.2, 0.2, 1.0);
-	directionalLight1.Intensity = 1.0f;
+	light2.Type = LIGHT_TYPE_DIRECTIONAL;
+	light2.Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
+	light2.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	light2.Intensity = 1.0f;
+
+	light3.Type = LIGHT_TYPE_DIRECTIONAL;
+	light3.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	light3.Color = XMFLOAT3(0.0, 1.0, 0.0);
+	light3.Intensity = 1.0f;
+
+	pointLight1.Type = LIGHT_TYPE_POINT;
+	pointLight1.Position = XMFLOAT3(1.0,1.0,1.0);
+	pointLight1.Color = XMFLOAT3(1.0, 1.0, 0.0);
+	pointLight1.Intensity = 1.0f;
+	pointLight1.Range = 10.0f;
+
+	pointLight2.Type = LIGHT_TYPE_POINT;
+	pointLight2.Position = XMFLOAT3(-2.0, 0.0, 0.0);
+	pointLight2.Color = XMFLOAT3(0.0, 1.0, 1.0);
+	pointLight2.Intensity = 1.0f;
+	pointLight2.Range = 3.0f;
+
+	lights.push_back(light1);
+	lights.push_back(light2);
+	lights.push_back(light3);
+	lights.push_back(pointLight1);
+	lights.push_back(pointLight2);
 	
 	// Set initial graphics API state
 	//  - These settings persist until we change them
@@ -313,8 +344,8 @@ void Game::CreateGeometry()
 	// - But just to see how it's done...
 	unsigned int indices[] = { 0, 1, 2 };
 
-
-	// Create a VERTEX BUFFER
+	{
+		// Create a VERTEX BUFFER
 	// - This holds the vertex data of triangles for a single object
 	// - This buffer is created on the GPU, which is where the data needs to
 	//    be if we want the GPU to act on it (as in: draw it to the screen)
@@ -367,6 +398,8 @@ void Game::CreateGeometry()
 	//	device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
 	//}
 
+	}
+	
 	// Shape #1
 	Vertex vert1[] =
 	{
@@ -417,10 +450,10 @@ void Game::CreateGeometry()
 	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>(FixPath("../../Assets/helix.obj").c_str(), device);
 	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>(FixPath("../../Assets/sphere.obj").c_str(), device);
 	// Set Materials
-	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 1.0f);
-	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT4(0.5f, 0.5f, 0.0f, 1.0f), vertexShader, pixelShader, 1.0f);
-	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), vertexShader, pixelShader, 1.0f);
-	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), vertexShader, pixelShaderNew, 1.0f);
+	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f);
+	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT3(0.5f, 0.5f, 0.0f), vertexShader, pixelShader, 0.5f);
+	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f);
+	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT3(1.0f, 0.0f, 1.0f), vertexShader, pixelShader, 0.0f);
 
 
 	materials.push_back(material1);
@@ -529,11 +562,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 	
-	for (int i = 1; i < entities.size(); i++) {
-		entities[i]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
-		entities[i]->GetMaterial()->GetPixelShader()->SetData("directionalLight1", &directionalLight1, sizeof(Light));
-	}
 	for (int i = 0; i < entities.size(); i++) {
+		entities[i]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
+		entities[i]->GetMaterial()->GetPixelShader()->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
 		entities[i]->Draw(context, activeCam);
 	}
 

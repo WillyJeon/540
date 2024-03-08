@@ -22,7 +22,7 @@ void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::
 	vs->SetShader();
 	ps->SetShader();
 
-	ps->SetFloat4("colorTint", material->GetColorTint()); // Strings here MUST
+	ps->SetFloat3("colorTint", material->GetColorTint()); // Strings here MUST
 	vs->SetMatrix4x4("worldMatrix", object.GetWorldMatrix()); // match variable
 	vs->SetMatrix4x4("view", cam->GetViewMatrix()); // names in your
 	vs->SetMatrix4x4("projection", cam->GetProjectionMatrix()); // shader’s cbuffer!
