@@ -39,6 +39,7 @@ private:
 	float move;
 	std::vector<std::shared_ptr<Camera>> cam;
 	std::vector<Light> lights;
+	std::vector<XMFLOAT3> colors;
 
 	DirectX::XMFLOAT3 ambientColor;
 
@@ -50,6 +51,7 @@ private:
 	void BuildUI();
 	void EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities);
 	void CamerasUI();
+	void LightsUI();
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the

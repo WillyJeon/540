@@ -17,22 +17,8 @@ Transforms* GameEntity::GetTransform()
 
 void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::shared_ptr<Camera> cam)
 {
-	std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
-	std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
-	vs->SetShader();
-	ps->SetShader();
+	material->PrepareMaterial(&object, cam);
 
-	ps->SetFloat3("colorTint", material->GetColorTint()); // Strings here MUST
-	vs->SetMatrix4x4("worldMatrix", object.GetWorldMatrix()); // match variable
-	vs->SetMatrix4x4("view", cam->GetViewMatrix()); // names in your
-	vs->SetMatrix4x4("projection", cam->GetProjectionMatrix()); // shader’s cbuffer!
-	ps->SetFloat("roughness", material->GetRoughness());
-	ps->SetFloat3("cameraPosition", cam->GetTransform()->GetPosition());
-	vs->SetMatrix4x4("worldInverseTranspose", GetTransform()->GetWorldInverseTransposeMatrix());
-
-	vs->CopyAllBufferData();
-
-	ps->CopyAllBufferData();
 	/*BufferStruct bsData;
 	bsData.colorTint = DirectX::XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
 	bsData.worldMatrix = object.GetWorldMatrix();
@@ -63,3 +49,5 @@ std::shared_ptr<Material> GameEntity::GetMaterial()
 {
 	return material;
 }
+
+

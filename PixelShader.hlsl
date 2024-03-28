@@ -1,26 +1,14 @@
 #include "ShaderIncludes.hlsli"
-#define MAX_SPECULAR_EXPONENT 256.0F;
-#define LIGHT_TYPE_DIRECTIONAL 0
-#define LIGHT_TYPE_POINT 1
-#define LIGHT_TYPE_SPOT 2
 
-struct Light {
-	int Type;
-	float3 Direction;
-	float Range;
-	float3 Position;
-	float Intensity;
-	float3 Color;
-	float SpotFalloff;
-	float3 Padding;
-
-};
 cbuffer ExternalData : register(b0)
 {
     float3 colorTint;
     float3 cameraPosition;
     float roughness;
     float3 ambient;
+    float2 uvScale;
+    float2 uvOffset;
+    float shiny;
 	Light lights[5];
 	
 };
@@ -44,44 +32,12 @@ cbuffer ExternalData : register(b0)
 
 // --------------------------------------------------------
 
-float Diffuse(float3 normal, float3 direction)
-{
-    return saturate(dot(normal, direction));
-}
+Texture2D SurfaceTexture : register(t0);
+Texture2D SpecularMap : register(t1);
+
+SamplerState BasicSampler : register(s0);
 
 
-float Specular(float3 normal, float3 direction, float roughness, float3 cam)
-{
-    float3 ref = reflect(-direction, normal);
-	
-    return roughness == 1 ? 0.0f : pow(max(dot(cam, ref), 0), (1 - roughness) * 256);
-}
-
-
-float Attenuate(Light light, float3 worldPos)
-{
-    float dist = distance(light.Position, worldPos);
-    float att = saturate(1.0f - (dist * dist / (light.Range * light.Range)));
-    return att * att;
-}
-
-
-float3 DirectionalLight(float3 normal, float3 position, float roughness, float3 cam, Light light, float3 color)
-{
-    float3 toLight = normalize(-light.Direction);
-    float3 toCamera = normalize(cam - position);
-    
-    return (Diffuse(normal, toLight) * color + Specular(normal, toLight, roughness, toCamera)) * light.Intensity * light.Color;
-}
-
-float3 PointLight(float3 normal, float3 position, float roughness, float3 cam, Light light, float3 color)
-{
-    float3 toLight = normalize(-light.Direction);
-    float3 toCamera = normalize(cam - position);
-    
-    return (Diffuse(normal, toLight) * color + Specular(normal, toLight, roughness, toCamera)) * Attenuate(light, position) * light.Intensity * light.Color;
-
-}
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
@@ -91,10 +47,13 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//   of the triangle we're rendering
     input.normal = normalize(input.normal);
 	
-	
+    float3 surfaceColor = SurfaceTexture.Sample(BasicSampler, input.uv).rgb;    
+    surfaceColor *= colorTint;
+    
 	//Ambient
-    float3 finalColor = ambient * colorTint;
+    float3 finalColor = ambient * surfaceColor;
 	
+    float specularScale = SpecularMap.Sample(BasicSampler, input.uv).r * shiny;
 	
     for (int i = 0; i < 5; i++)
     {
@@ -103,23 +62,19 @@ float4 main(VertexToPixel input) : SV_TARGET
         // Directional
         switch (light.Type)
         {
-            case LIGHT_TYPE_DIRECTIONAL: 
-                finalColor += DirectionalLight(input.normal, input.worldPosition, roughness, cameraPosition, light, colorTint);
+            case 0:
+                finalColor += DirectionalLight(input.normal, input.worldPosition, roughness, cameraPosition, light, surfaceColor, specularScale);
                 break;
             
-            case LIGHT_TYPE_POINT:
-                finalColor += PointLight(input.normal, input.worldPosition, roughness, cameraPosition, light, colorTint);
-                break;
-            
-            case LIGHT_TYPE_SPOT:
-                break;
-            
+            case 1:
+                finalColor += PointLight(input.normal, input.worldPosition, roughness, cameraPosition, light, surfaceColor, specularScale);
+                break;    
             
         }
 
     
-	
+    }
     
         return float4(finalColor, 1);
-    }
+    
 }

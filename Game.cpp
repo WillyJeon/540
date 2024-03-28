@@ -18,6 +18,7 @@
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3dcompiler.h>
+#include "WICTextureLoader.h"
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -41,9 +42,9 @@ Game::Game(HINSTANCE hInstance)
 	color{ 0, 0, 0, 1 },
 	hand(0),
 	cpHand(0),
-	tint{1.0f, 0.5f, 0.5f, 1.0f},
-	offset{0,0,0}, 
-	ambientColor(0.1f, 0.1f, 0.25f)
+	tint{ 1.0f, 0.5f, 0.5f, 1.0f },
+	offset{ 0,0,0 },
+	ambientColor(0.1f, 0.1f, 0.1f)
 {
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -54,7 +55,7 @@ Game::Game(HINSTANCE hInstance)
 	int number = 0;
 	move = 1;
 	bool show = false;
-	
+
 }
 
 // --------------------------------------------------------
@@ -99,39 +100,50 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	CreateGeometry();
-	
+
 	Light light1 = {};
 	Light light2 = {};
 	Light light3 = {};
 	Light pointLight1 = {};
 	Light pointLight2 = {};
-	
+	XMFLOAT3 directionalColor1 = XMFLOAT3(1, 1, 1);
+	XMFLOAT3 directionalColor2 = XMFLOAT3(1, 1, 1);
+	XMFLOAT3 directionalColor3 = XMFLOAT3(1, 1, 1);
+	XMFLOAT3 pointColor1 = XMFLOAT3(1, 1, 1);
+	XMFLOAT3 pointColor2 = XMFLOAT3(1, 1, 1);
+
+	colors.push_back(directionalColor1);
+	colors.push_back(directionalColor2);
+	colors.push_back(directionalColor3);
+	colors.push_back(pointColor1);
+	colors.push_back(pointColor2);
+
 
 	light1.Type = LIGHT_TYPE_DIRECTIONAL;
 	light1.Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	light1.Color = XMFLOAT3(1.0, 0.0, 0.0);
-	light1.Intensity = 1.0f;
+	light1.Color = colors[0];
+	light1.Intensity = 0.3f;
 
 	light2.Type = LIGHT_TYPE_DIRECTIONAL;
 	light2.Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
-	light2.Color = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	light2.Intensity = 1.0f;
+	light2.Color = colors[1];
+	light2.Intensity = 0.3f;
 
 	light3.Type = LIGHT_TYPE_DIRECTIONAL;
-	light3.Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	light3.Color = XMFLOAT3(0.0, 1.0, 0.0);
-	light3.Intensity = 1.0f;
+	light3.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	light3.Color = colors[2];
+	light3.Intensity = 0.3f;
 
 	pointLight1.Type = LIGHT_TYPE_POINT;
-	pointLight1.Position = XMFLOAT3(1.0,1.0,1.0);
-	pointLight1.Color = XMFLOAT3(1.0, 1.0, 0.0);
-	pointLight1.Intensity = 1.0f;
-	pointLight1.Range = 10.0f;
+	pointLight1.Position = XMFLOAT3(1.0, 0.0, -2.0);
+	pointLight1.Color = colors[3];
+	pointLight1.Intensity = 0.3f;
+	pointLight1.Range = 5.0f;
 
 	pointLight2.Type = LIGHT_TYPE_POINT;
 	pointLight2.Position = XMFLOAT3(-2.0, 0.0, 0.0);
-	pointLight2.Color = XMFLOAT3(0.0, 1.0, 1.0);
-	pointLight2.Intensity = 1.0f;
+	pointLight2.Color = colors[4];
+	pointLight2.Intensity = 0.3f;
 	pointLight2.Range = 3.0f;
 
 	lights.push_back(light1);
@@ -139,7 +151,7 @@ void Game::Init()
 	lights.push_back(light3);
 	lights.push_back(pointLight1);
 	lights.push_back(pointLight2);
-	
+
 	// Set initial graphics API state
 	//  - These settings persist until we change them
 	//  - Some of these, like the primitive topology & input layout, probably won't change
@@ -158,8 +170,8 @@ void Game::Init()
 		//  - Once you start applying different shaders to different objects,
 		//    these calls will need to happen multiple times per frame
 	}
-	
-	
+
+
 
 	//unsigned int size = sizeof(BufferStruct);
 	//size = (size + 15) / 16 * 16;
@@ -169,9 +181,9 @@ void Game::Init()
 	//cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	//cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f), (float)this->windowWidth / this->windowHeight, 100.0f,  0.1f, 1000.0f));
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2.0f, 0.0f, -2.0f), ((float)this->windowWidth / this->windowHeight)/2.0f, 60.0f, 0.1f, 1000.0f));
-	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3.0f, 0.0f, -3.0f), ((float)this->windowWidth / this->windowHeight)/3.0f, 150.0f, 0.1f, 1000.0f));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f), (float)this->windowWidth / this->windowHeight, 100.0f, 0.1f, 1000.0f));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(-2.0f, 0.0f, -2.0f), ((float)this->windowWidth / this->windowHeight) / 2.0f, 60.0f, 0.1f, 1000.0f));
+	cam.push_back(std::make_shared<Camera>(DirectX::XMFLOAT3(3.0f, 0.0f, -3.0f), ((float)this->windowWidth / this->windowHeight) / 3.0f, 150.0f, 0.1f, 1000.0f));
 	activeCam = cam[0];
 }
 
@@ -192,10 +204,10 @@ void Game::Helper(float deltaTime) {
 	input.SetMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
 	//ImGui::ShowDemoWindow();
-	
+
 }
 
-void Game::BuildUI() 
+void Game::BuildUI()
 {
 	ImGui::Begin("Some Stats");
 
@@ -203,17 +215,16 @@ void Game::BuildUI()
 		ImGui::ShowDemoWindow();
 	}
 
-	
+
 	// Framerate
 	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
 
 	// Dimensions
 	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
 
-	XMFLOAT4 bColor(color[0], color[1], color[2], color[3]);
 	// Color Picker
 	ImGui::ColorEdit4("RGBA color editor", color);
-	if (ImGui::Button("Show ImGui Demo Window")) 
+	if (ImGui::Button("Show ImGui Demo Window"))
 	{
 		show = !show;
 	}
@@ -227,10 +238,16 @@ void Game::BuildUI()
 	}
 
 	CamerasUI();
+
+
+	if (ImGui::TreeNode("Lights")) {
+		LightsUI();
+		ImGui::TreePop();
+	}
 	ImGui::End();
 }
 
-void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities) 
+void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities)
 {
 	for (int i = 0; i < entities.size(); i++) {
 		ImGui::PushID(i);
@@ -239,7 +256,7 @@ void Game::EntitiesUI(std::vector<std::shared_ptr<GameEntity>> entities)
 			XMFLOAT3 pos = transform->GetPosition();
 			XMFLOAT3 rot = transform->GetPitchYawRoll();
 			XMFLOAT3 scale = transform->GetScale();
-			
+
 			if (ImGui::DragFloat3("Position", &pos.x, 0.1f)) {
 				transform->SetPosition(pos.x, pos.y, pos.z);
 			}
@@ -283,6 +300,38 @@ void Game::CamerasUI()
 
 }
 
+void Game::LightsUI() {
+
+	for (int i = 0; i < lights.size(); i++) {
+		ImGui::PushID(i);
+		if (ImGui::TreeNode("Light", "Light %i", i)) {
+			if (lights[i].Type == 0) {
+				ImGui::Text("Directional Light");
+				ImGui::Spacing();
+				ImGui::DragFloat3("Direction", &lights[i].Direction.x, 0.1f);
+				ImGui::Spacing();
+			}
+			else if (lights[i].Type == 1) {
+				ImGui::Text("Point Light");
+				ImGui::Spacing();
+				ImGui::DragFloat3("Position", &lights[i].Position.x, 0.1f);
+				ImGui::Spacing();
+				ImGui::SliderFloat("Range", &lights[i].Range, 0, 10);
+				ImGui::Spacing();
+			}
+			ImGui::SliderFloat("Intensity", &lights[i].Intensity, 0, 1);
+			ImGui::Spacing();
+
+			ImGui::ColorEdit3("Color", &lights[i].Color.x);
+
+
+			ImGui::TreePop();
+		}
+
+		ImGui::PopID();
+	}
+}
+
 // --------------------------------------------------------
 // Loads shaders from compiled shader object (.cso) files
 // and also created the Input Layout that describes our 
@@ -309,13 +358,22 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+	D3D11_SAMPLER_DESC sampDesc = {};
 
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.MaxAnisotropy = 16;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&sampDesc, sampler.GetAddressOf());
 
 	// Create some temporary variables to represent colors
 	// - Not necessary, just makes things more readable
-	XMFLOAT3 red	= XMFLOAT3(1.0f, 0.0f, 0.0f);
-	XMFLOAT3 green	= XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3 blue	= XMFLOAT3(0.0f, 0.0f, 1.0f);
+	XMFLOAT3 red = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 green = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 blue = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 	// Set up the vertices of the triangle we would like to draw
 	// - We're going to copy this array, exactly as it exists in CPU memory
@@ -331,7 +389,7 @@ void Game::CreateGeometry()
 	//    since we're describing the triangle in terms of the window itself
 	Vertex vertices[] =
 	{
-		
+
 		{ XMFLOAT3(+0.0f, +0.5f, +0.0f), red },
 		{ XMFLOAT3(+0.5f, -0.5f, +0.0f), blue },
 		{ XMFLOAT3(-0.5f, -0.5f, +0.0f), green },
@@ -399,7 +457,7 @@ void Game::CreateGeometry()
 	//}
 
 	}
-	
+
 	// Shape #1
 	Vertex vert1[] =
 	{
@@ -410,7 +468,7 @@ void Game::CreateGeometry()
 	};
 
 	unsigned int indices1[] = { 0, 1, 2 };
-	
+
 	// Shape #2
 	Vertex vert2[] = {
 		{XMFLOAT3(-0.3f, -0.3f, +0.0f), red}, //Bottom Left
@@ -444,28 +502,69 @@ void Game::CreateGeometry()
 		{XMFLOAT3(+0.725f, -0.75f, +0.0f), green}, //6
 	};
 
-	unsigned int indices4[] = { 0, 1, 2, 3, 4, 5, 4 , 6, 5 };
-	std::shared_ptr<Mesh> cube = std::make_shared<Mesh>(FixPath("../../Assets/cube.obj").c_str(), device);
-	std::shared_ptr<Mesh> cylinder = std::make_shared<Mesh>(FixPath("../../Assets/cylinder.obj").c_str(), device);
-	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>(FixPath("../../Assets/helix.obj").c_str(), device);
-	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>(FixPath("../../Assets/sphere.obj").c_str(), device);
-	// Set Materials
-	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f);
-	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT3(0.5f, 0.5f, 0.0f), vertexShader, pixelShader, 0.5f);
-	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f);
-	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT3(1.0f, 0.0f, 1.0f), vertexShader, pixelShader, 0.0f);
+	// TEXTURES
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rustyMetalSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rustyMetalSpecularSRV;
 
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesSpecularSRV;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brokenTilesSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> brokenTilesSpecularSRV;
+
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/rustymetal.png").c_str(), 0, rustyMetalSRV.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/rustymetal_specular.png").c_str(), 0, rustyMetalSpecularSRV.GetAddressOf());
+	
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles.png").c_str(), 0, tilesSRV.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles_specular.png").c_str(), 0, tilesSpecularSRV.GetAddressOf());
+	
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/brokentiles.png").c_str(), 0, brokenTilesSRV.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/brokentiles_specular.png").c_str(), 0, brokenTilesSpecularSRV.GetAddressOf());
+
+	unsigned int indices4[] = { 0, 1, 2, 3, 4, 5, 4 , 6, 5 };
+	std::shared_ptr<Mesh> cube = std::make_shared<Mesh>(FixPath("../../Assets/Models/cube.obj").c_str(), device);
+	std::shared_ptr<Mesh> cylinder = std::make_shared<Mesh>(FixPath("../../Assets/Models/cylinder.obj").c_str(), device);
+	std::shared_ptr<Mesh> helix = std::make_shared<Mesh>(FixPath("../../Assets/Models/helix.obj").c_str(), device);
+	std::shared_ptr<Mesh> sphere = std::make_shared<Mesh>(FixPath("../../Assets/Models/sphere.obj").c_str(), device);
+	
+	// Set Materials
+	std::shared_ptr<Material> material1 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f, 1.0f);
+	std::shared_ptr<Material> material2 = std::make_shared<Material>(XMFLOAT3(0.5f, 0.5f, 0.5f), vertexShader, pixelShader, 0.5f, 1.0f);
+	std::shared_ptr<Material> material3 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f, 1.0f);
+	std::shared_ptr<Material> material4 = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f, 1.0f);
+	
+	std::shared_ptr<Material> metalMat = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f, 10.0f);
+	
+	metalMat->SetSampler("BasicSampler", sampler);
+	metalMat->SetTextureSRV("SurfaceTexture", rustyMetalSRV);
+	metalMat->SetTextureSRV("SpecularMap", rustyMetalSpecularSRV);
+
+	std::shared_ptr<Material> tileMat = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f, 5.0f);
+
+	tileMat->SetSampler("BasicSampler", sampler);
+	tileMat->SetTextureSRV("SurfaceTexture", tilesSRV);
+	tileMat->SetTextureSRV("SpecularMap", tilesSpecularSRV);
+
+	std::shared_ptr<Material> brokenTileMat = std::make_shared<Material>(XMFLOAT3(1.0f, 1.0f, 1.0f), vertexShader, pixelShader, 0.0f, 7.0f);
+
+	brokenTileMat->SetSampler("BasicSampler", sampler);
+	brokenTileMat->SetTextureSRV("SurfaceTexture", brokenTilesSRV);
+	brokenTileMat->SetTextureSRV("SpecularMap", brokenTilesSpecularSRV);
 
 	materials.push_back(material1);
 	materials.push_back(material2);
 	materials.push_back(material3);
 	materials.push_back(material4);
+	materials.push_back(metalMat);
+	materials.push_back(tileMat);
+	materials.push_back(brokenTileMat);
 	//Entities list
 
-	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(cube, material4);
-	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(cylinder, material2);
-	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(helix, material3);
-	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(sphere, material1);
+	std::shared_ptr<GameEntity> entityOne = std::make_shared<GameEntity>(cube, tileMat);
+	std::shared_ptr<GameEntity> entityTwo = std::make_shared<GameEntity>(cylinder, brokenTileMat);
+	std::shared_ptr<GameEntity> entityThree = std::make_shared<GameEntity>(helix, brokenTileMat);
+	std::shared_ptr<GameEntity> entityFour = std::make_shared<GameEntity>(sphere, metalMat);
+	
 	//std::shared_ptr<GameEntity> entityFive = std::make_shared<GameEntity>(square, material3);
 
 	//entityOne->GetTransform()->Rotate(0, 0, .3f);
@@ -493,9 +592,9 @@ void Game::OnResize()
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
 	for (int i = 0; i < cam.size(); i++) {
-		cam[i]->UpdateProjectionMatrix((float)this->windowWidth / this->windowHeight);
+		cam[i]->UpdateProjectionMatrix((float)this->windowWidth / (float)this->windowHeight);
 	}
-	
+
 }
 
 // --------------------------------------------------------
@@ -506,9 +605,9 @@ void Game::Update(float deltaTime, float totalTime)
 	Helper(deltaTime);
 	BuildUI();
 	activeCam->Update(deltaTime);
-	entities[0]->GetMaterial()->GetPixelShader() ->SetFloat("time", totalTime);
+	entities[0]->GetMaterial()->GetPixelShader()->SetFloat("time", totalTime);
 	entities[0]->GetMaterial()->GetPixelShader()->SetFloat2("resolution", XMFLOAT2(windowWidth, windowHeight));
-	
+
 	/*for (int i = 0; i < 2; i++) {
 		if (entities[i]->GetTransform()->GetPosition().x > 1.0f) {
 			move = -1;
@@ -527,17 +626,17 @@ void Game::Update(float deltaTime, float totalTime)
 		if (entities[i]->GetTransform()->GetPosition().y < -1.0f) {
 			move = 1;
 		}
-		
+
 		entities[i]->GetTransform()->MoveAbsolute(0, deltaTime * move, 0);
 		entities[i]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);
 	}
 	float scale = (float)cos(totalTime * 2.0f) * 1.0f + 2.0f;
 
-	
-	
+
+
 	entities[4]->GetTransform()->SetScale(scale,scale,scale);
 	entities[4]->GetTransform()->Rotate(0, 0, deltaTime * 1.0f);*/
-	
+
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
@@ -561,7 +660,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
-	
+
 	for (int i = 0; i < entities.size(); i++) {
 		entities[i]->GetMaterial()->GetPixelShader()->SetFloat3("ambient", ambientColor);
 		entities[i]->GetMaterial()->GetPixelShader()->SetData("lights", &lights[0], sizeof(Light) * (int)lights.size());
@@ -582,8 +681,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		//  - Puts the results of what we've drawn onto the window
 		//  - Without this, the user never sees anything
 		bool vsyncNecessary = vsync || !deviceSupportsTearing || isFullscreen;
-		
-		
+
+
 
 		swapChain->Present(
 			vsyncNecessary ? 1 : 0,

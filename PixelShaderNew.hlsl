@@ -24,6 +24,9 @@ cbuffer ExternalData : register(b0)
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
 
+
+
+
 float random(float s)
 {
     return frac(sin(s) * 43758.5453123);
